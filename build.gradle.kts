@@ -20,7 +20,7 @@ dependencies {
     // YAML 解析
     implementation("net.mamoe.yamlkt:yamlkt:0.13.0")
     // JSON Schema
-    implementation("com.networknt:json-schema-validator:3.0.3")
+    implementation("com.networknt:json-schema-validator:1.0.87")
     // Kotlin 序列化
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
     // Kotlin 协程核心库
