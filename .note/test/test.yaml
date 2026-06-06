@@ -1,0 +1,52 @@
+# yaml-language-server: $schema=schema.yaml
+
+variables:
+  ApiKey:
+    type: "String"
+    required: true
+    description: "供应商的 API 密钥"
+  Model:
+    type: "String"
+    required: true
+    description: "需要调用的模型"
+  Content:
+    type: "List:Dialogue"
+    required: true
+    description: "对话列表"
+
+types:
+  Dialogue:
+    description: "对话内容"
+    struct:
+      role:
+        type: "String"
+      content:
+        type: "String"
+
+baseUrl: "https://api.openai.com/v1"
+
+endpoints:
+  completions:
+    path: "/chat/completions"
+    request:
+      method: "POST"
+      headers:
+        Authorization: "Bearer ${{variables.ApiKey}}"
+        Content-Type: "application/json"
+        Accept: "application/json"
+      body:
+        model: "${{variables.Model}}"
+        messages: "{{variables.Content}}"
+    response:
+      - httpCode: "type:success"
+        type: "Json"
+        values:
+          - name: "content"
+            type: "Dialogue"
+            path: '$.choices[0].message.content'
+      - httpCode: "code:403"
+        type: "Json"
+        values:
+          - name: "errMsg"
+            type: "String"
+            path: '$.error.message'
