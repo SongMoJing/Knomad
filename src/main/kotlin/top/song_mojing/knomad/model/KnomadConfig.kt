@@ -45,6 +45,19 @@ enum class ResponseType {
 }
 
 @Serializable
+enum class HttpMethod {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    PATCH,
+    HEAD,
+    OPTIONS,
+    TRACE,
+    CONNECT,
+}
+
+@Serializable
 data class KnomadConfig(
     val variables: Map<String, Variable> = emptyMap(),
     val types: Map<String, CustomType> = emptyMap(),
@@ -81,7 +94,7 @@ data class Endpoint(
 
 @Serializable
 data class RequestConfig(
-    val method: String,
+    val method: HttpMethod,
     val params: Map<String, YamlElement>? = null,
     val headers: Map<String, YamlElement>? = null,
     val body: Map<String, YamlElement>? = null

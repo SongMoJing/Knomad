@@ -114,6 +114,7 @@ properties:
             method:
               description: "HTTP 方法"
               type: "string"
+              enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE", "CONNECT"]
             params:
               description: "URL Query 拼接参数"
               type: "object"
