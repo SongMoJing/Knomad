@@ -1,5 +1,4 @@
 import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.parser.yaml.YamlValidator
 import top.song_mojing.knomad.model.KnomadConfig
 import top.song_mojing.knomad.parser.yaml.YamlParser
 import top.song_mojing.knomad.parser.yaml.YamlParserException

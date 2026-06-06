@@ -23,6 +23,14 @@ object YamlParser {
     }
 
     fun parser(
+        yamlContent: String
+    ): KnomadConfig {
+        val schemaContent = YamlParser::class.java.getResource("/schema.yaml")?.readText()
+            ?: throw Exception("schema.yaml not found")
+        return parser(yamlContent, schemaContent)
+    }
+
+    fun parser(
         yamlContent: String,
         schemaContent: String
     ): KnomadConfig {
