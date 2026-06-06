@@ -39,6 +39,7 @@ sealed class Type {
     }
 }
 
+@Serializable
 enum class ResponseType {
     Json
 }

@@ -1,4 +1,4 @@
-package top.song_mojing.knomad
+package top.song_mojing.knomad.parser.yaml
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.node.ObjectNode
@@ -66,17 +66,17 @@ sealed class ValidatorException(message: String) : Exception(message) {
     /**
      * 输入的 YAML 格式错误
      */
-    class InvalidYamlException(message: String) : ValidatorException(message)
+    open class InvalidYamlException(message: String) : ValidatorException(message)
 
     /**
      * 输入的 JSON Schema 错误
      */
-    class InvalidSchemaException(message: String) : ValidatorException(message)
+    open class InvalidSchemaException(message: String) : ValidatorException(message)
 
     /**
      * 输入的 YAML 无法被 JSON Schema 验证
      */
-    class InvalidGrammarException(
+    open class InvalidGrammarException(
         path: String,
         message: String
     ) : ValidatorException(message)
