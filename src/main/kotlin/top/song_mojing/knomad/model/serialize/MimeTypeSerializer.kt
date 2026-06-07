@@ -1,10 +1,11 @@
-package top.song_mojing.knomad.model
+package top.song_mojing.knomad.model.serialize
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import top.song_mojing.knomad.model.MimeType
 
 object MimeTypeSerializer : KSerializer<MimeType> {
 

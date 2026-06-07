@@ -133,7 +133,7 @@ properties:
                   description: "Authorization 请求头"
                   type: "string"
                 Content-Type:
-                  description: "Content-BaseType 请求头"
+                  description: "Content-Type 请求头"
                   $ref: "#/definitions/mimeType"
             body:
               description: "HTTP 请求体"

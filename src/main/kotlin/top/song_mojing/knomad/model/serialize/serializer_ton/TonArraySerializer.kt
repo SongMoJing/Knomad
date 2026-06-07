@@ -1,4 +1,4 @@
-package top.song_mojing.knomad.model.serializer_ton
+package top.song_mojing.knomad.model.serialize.serializer_ton
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer

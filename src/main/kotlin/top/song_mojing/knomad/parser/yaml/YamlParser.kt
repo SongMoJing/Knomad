@@ -1,7 +1,7 @@
 package top.song_mojing.knomad.parser.yaml
 
 import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.model.KnomadConfigStruct
+import top.song_mojing.knomad.model.serialize.KnomadConfigStruct
 import java.io.File
 
 @Suppress("unused")
