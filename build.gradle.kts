@@ -24,13 +24,15 @@ dependencies {
     // Kotlin 序列化
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
     // Kotlin 协程核心库
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     // Ktor HTTP 客户端
     testImplementation("io.ktor:ktor-client-core:3.0.1")
     testImplementation("io.ktor:ktor-client-okhttp:3.0.1")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.0.1")
     // JsonPath
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
+    // Json 解析
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")

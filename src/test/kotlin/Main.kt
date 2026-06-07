@@ -1,29 +1,51 @@
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.request.post
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
-import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.model.serialize.KnomadConfigStruct
-import top.song_mojing.knomad.parser.yaml.YamlParser
-import top.song_mojing.knomad.parser.yaml.YamlParserException
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import top.song_mojing.knomad.model.HttpMethod.*
+import top.song_mojing.knomad.model.KnomadValue
+import top.song_mojing.knomad.model.new
+import top.song_mojing.knomad.validator.Context
+import top.song_mojing.knomad.validator.Variable
+import top.song_mojing.knomad.validator.parse
 import kotlin.test.Test
-import kotlin.text.Charsets.UTF_8
 
 class MainTest {
     @Test
     fun test(): Unit = runBlocking {
         val client = HttpClient()
-        MainTest::class.java.getResource("test.yaml")?.let { uri ->
-            val file = uri.readText(UTF_8)
-            try {
-                val config = YamlParser.parser(file)
-                val response = client.post("https://httpbin.org/post")
-                println(response)
-            } catch (error: YamlParserException) {
-                error.validatorExceptions.forEach {
-                    println(it)
+        val config = loadConfig("OpenAI.yaml")
+        val context = Context(
+            mapOf(
+                "Model" to "Qwen2.5-7B-Instruct",
+                "Content" to "Hello World!"
+            ),
+            config.variables
+        )
+        config.endpoints.forEach { (endpointName, endpoint) ->
+            val block: HttpRequestBuilder.() -> Unit = {
+                endpoint.request.headers?.forEach { (key, value) ->
+                    header(key, value.parse(context))
                 }
+                setBody(
+                    Json.encodeToString(endpoint.request.body?.parse(context))
+                )
             }
+            val res = when (endpoint.request.method) {
+                GET -> client.get("${config.baseUrl}${endpoint.path}", block)
+                POST -> client.post("${config.baseUrl}${endpoint.path}", block)
+                PUT -> client.put("${config.baseUrl}${endpoint.path}", block)
+                DELETE -> client.delete("${config.baseUrl}${endpoint.path}", block)
+                PATCH -> client.patch("${config.baseUrl}${endpoint.path}", block)
+                HEAD -> client.head("${config.baseUrl}${endpoint.path}", block)
+                OPTIONS -> client.options("${config.baseUrl}${endpoint.path}", block)
+                else -> return@forEach
+            }
+            println("++++++++++++++++[${endpoint.request.method}] ${endpointName}================================")
+            println("URL: ${config.baseUrl}/${endpoint.path}")
+            println(res.bodyAsText())
         }
     }
 }

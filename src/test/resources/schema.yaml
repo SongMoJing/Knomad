@@ -5,7 +5,6 @@ description: "自定义 API 描述文件的校验 Schema，支持基础类型、
 type: "object"
 required:
   - "variables"
-  - "types"
   - "baseUrl"
   - "endpoints"
 
@@ -58,7 +57,7 @@ properties:
   # 自定义复合数据结构
   types:
     description: "自定义复合数据结构"
-    type: "object"
+    type: ["object", "null"]
     additionalProperties:
       type: "object"
       required:

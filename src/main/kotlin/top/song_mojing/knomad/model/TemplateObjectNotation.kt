@@ -13,7 +13,7 @@ import top.song_mojing.knomad.model.serialize.serializer_ton.TonObjectSerializer
 sealed class TonItem
 
 @Serializable(with = TonObjectSerializer::class)
-class TonObject(val fields: Map<String, TonItem>): TonItem()
+class TonObject(var fields: Map<String, TonItem>): TonItem()
 
 @JvmName("tonObjectOfItems")
 fun tonObjectOf(vararg fields: Pair<String, TonItem>): TonObject {
@@ -30,7 +30,7 @@ fun tonObjectOf(vararg fields: Pair<String, String>): TonObject {
 }
 
 @Serializable(with = TonArraySerializer::class)
-class TonArray(val items: List<TonItem>): TonItem()
+class TonArray(var items: List<TonItem>): TonItem()
 
 fun tonArrayOf(vararg items: TonItem): TonArray {
     return TonArray(items.toList())
@@ -43,7 +43,7 @@ fun tonArrayOf(vararg items: TonItem): TonArray {
 sealed class TonValue: TonItem()
 
 @Serializable
-class TonString(val value: TemplateString) : TonValue()
+class TonString(var value: TemplateString) : TonValue()
 
 @JvmName("tonStringOfString")
 fun String.toTonString(): TonString {
@@ -59,10 +59,10 @@ fun String.toTonString(): TonString {
 }
 
 @Serializable(with = TonNumberSerializer::class)
-class TonNumber(val value: Number): TonValue()
+class TonNumber(var value: Number): TonValue()
 
 @Serializable
-class TonBoolean(val value: Boolean): TonValue()
+class TonBoolean(var value: Boolean): TonValue()
 
 @Serializable
 class TonNull: TonValue()

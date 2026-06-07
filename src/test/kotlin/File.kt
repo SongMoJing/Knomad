@@ -9,17 +9,23 @@ import kotlin.text.Charsets.UTF_8
 class FileTest {
     @Test
     fun test(): Unit = runBlocking {
-        MainTest::class.java.getResource("test.yaml")?.let { uri ->
+        val config = loadConfig("test.yaml")
+        val encode = Yaml.encodeToString(KnomadConfigStruct.serializer(), config)
+        println(encode)
+    }
+}
+
+fun loadConfig(fileName: String): KnomadConfigStruct {
+    try {
+        MainTest::class.java.getResource(fileName)?.let { uri ->
             val file = uri.readText(UTF_8)
-            try {
-                val config = YamlParser.parser(file)
-                val encode = Yaml.encodeToString(KnomadConfigStruct.serializer(), config)
-                println(encode)
-            } catch (error: YamlParserException) {
-                error.validatorExceptions.forEach {
-                    println(it)
-                }
-            }
+            return YamlParser.parser(file)
         }
+        throw Exception("YamlFileNotFound")
+    } catch (error: YamlParserException) {
+        error.validatorExceptions.forEach {
+            println(it)
+        }
+        throw Exception("YamlParserException")
     }
 }
