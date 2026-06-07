@@ -1,10 +1,11 @@
 package top.song_mojing.knomad.validator
 
 import top.song_mojing.knomad.model.*
+import top.song_mojing.knomad.model.serialize.VariableStruct
 
 class Context(
     variableMapper: Map<String, Any>,
-    variables: Map<String, top.song_mojing.knomad.model.serialize.Variable>
+    variables: Map<String, VariableStruct>
 ) {
 
     var variables: MutableMap<String, Variable> = mutableMapOf()
@@ -76,7 +77,7 @@ fun TemplateString.parse(context: Context): String {
         }
 
         is TemplateString.Struct -> {
-            this.struct.key
+            this.struct.typeName
         }
     }
 }

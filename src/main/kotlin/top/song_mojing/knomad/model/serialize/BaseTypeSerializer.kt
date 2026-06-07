@@ -33,7 +33,7 @@ object BaseTypeSerializer : KSerializer<KnomadType> {
             "int" -> KnomadType.Int()
             "float" -> KnomadType.Float()
             else -> {
-                KnomadType.Other(name)
+                KnomadType.Custom(name)
             }
         }
     }
@@ -46,7 +46,7 @@ object BaseTypeSerializer : KSerializer<KnomadType> {
             is KnomadType.Bool -> encoder.encodeString("Bool")
             is KnomadType.Int -> encoder.encodeString("Int")
             is KnomadType.Float -> encoder.encodeString("Float")
-            is KnomadType.Other -> encoder.encodeString(value.key)
+            is KnomadType.Custom -> encoder.encodeString(value.typeName)
         }
     }
 }

@@ -4,6 +4,8 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import top.song_mojing.knomad.model.HttpMethod.*
 import top.song_mojing.knomad.model.KnomadValue
 import top.song_mojing.knomad.model.new
@@ -33,19 +35,37 @@ class MainTest {
                     Json.encodeToString(endpoint.request.body?.parse(context))
                 )
             }
-            val res = when (endpoint.request.method) {
-                GET -> client.get("${config.baseUrl}${endpoint.path}", block)
-                POST -> client.post("${config.baseUrl}${endpoint.path}", block)
-                PUT -> client.put("${config.baseUrl}${endpoint.path}", block)
-                DELETE -> client.delete("${config.baseUrl}${endpoint.path}", block)
-                PATCH -> client.patch("${config.baseUrl}${endpoint.path}", block)
-                HEAD -> client.head("${config.baseUrl}${endpoint.path}", block)
-                OPTIONS -> client.options("${config.baseUrl}${endpoint.path}", block)
-                else -> return@forEach
-            }
-            println("++++++++++++++++[${endpoint.request.method}] ${endpointName}================================")
-            println("URL: ${config.baseUrl}/${endpoint.path}")
-            println(res.bodyAsText())
+            config.baseUrl.toHttpUrlOrNull()
+                ?.newBuilder()
+                ?.let { builder ->
+                    endpoint.path.split("/")
+                        .filter { it.isNotEmpty() }
+                        .forEach { builder.addPathSegment(it) }
+                    return@let builder
+                }
+                ?.let { builder ->
+                    endpoint.request.params?.forEach { (key, value) ->
+                        builder.addQueryParameter(key, value.parse(context))
+                    }
+                    return@let builder
+                }
+                ?.build()
+                ?.toString()
+                ?.let { url ->
+                    val res = when (endpoint.request.method) {
+                        GET -> client.get(url, block)
+                        POST -> client.post(url, block)
+                        PUT -> client.put(url, block)
+                        DELETE -> client.delete(url, block)
+                        PATCH -> client.patch(url, block)
+                        HEAD -> client.head(url, block)
+                        OPTIONS -> client.options(url, block)
+                        else -> return@forEach
+                    }
+                    println("++++++++++++++++[${endpoint.request.method}] $endpointName ================================")
+                    println("URL: $url")
+                    println(res.bodyAsText())
+                }
         }
     }
 }

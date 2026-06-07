@@ -24,7 +24,7 @@ object TemplateStringSerializer : KSerializer<TemplateString> {
     fun parseTemplateString(input: String): TemplateString {
         val structMatch = STRICT_PLACEHOLDER.find(input)
         if (structMatch != null) {
-            return TemplateString.Struct(KnomadType.Other(input.substring(2, input.length - 2)))
+            return TemplateString.Struct(KnomadType.Custom(input.substring(2, input.length - 2)))
         }
         val items = mutableListOf<TemplateString.StringTemplate.ValueItem>()
         var lastIndex = 0
@@ -48,9 +48,9 @@ object TemplateStringSerializer : KSerializer<TemplateString> {
     override fun serialize(encoder: Encoder, value: TemplateString) {
         val str = when (value) {
             is TemplateString.Struct -> "{{${
-                if (!value.struct.key.startsWith("knomad@")) "knomad@"
+                if (!value.struct.typeName.startsWith("knomad@")) "knomad@"
                 else ""
-            }${value.struct.key}}}"
+            }${value.struct.typeName}}}"
             is TemplateString.StringTemplate -> {
                 value.value.joinToString("") { item ->
                     when (item) {

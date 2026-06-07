@@ -72,6 +72,6 @@ fun KnomadType.new(value: Any?): KnomadValue {
             }
                 ?: return KnomadValue.Null)
         }
-        is KnomadType.Other -> KnomadValue.Other(value.toString())
+        is KnomadType.Custom -> KnomadValue.Other(value.toString())
     }
 }

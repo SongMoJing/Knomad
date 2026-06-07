@@ -10,41 +10,41 @@ import top.song_mojing.knomad.model.serialize.serializer_ton.TonObjectSerializer
 
 @Serializable
 data class KnomadConfigStruct(
-    val variables: Map<String, Variable> = emptyMap(),
-    val types: Map<String, CustomType> = emptyMap(),
+    val variables: Map<String, VariableStruct> = emptyMap(),
+    val types: Map<String, CustomTypeStruct> = emptyMap(),
     val baseUrl: String,
-    val endpoints: Map<String, Endpoint> = emptyMap()
+    val endpoints: Map<String, EndpointStruct> = emptyMap()
 )
 
 @Serializable
-data class Variable(
+data class VariableStruct(
     val type: KnomadType,
     val required: Boolean,
     val description: String? = null
 )
 
 @Serializable
-data class CustomType(
+data class CustomTypeStruct(
     val description: String? = null,
-    val struct: Map<String, StructField> = emptyMap()
+    val struct: Map<String, TypeStructFieldStruct> = emptyMap()
 )
 
 @Serializable
-data class StructField(
+data class TypeStructFieldStruct(
     val type: KnomadType,
     val description: String? = null,
-    val struct: Map<String, StructField>? = null
+    val struct: Map<String, TypeStructFieldStruct>? = null
 )
 
 @Serializable
-data class Endpoint(
+data class EndpointStruct(
     val path: String,
-    val request: RequestConfig,
-    val response: List<ResponseConfig> = emptyList()
+    val request: RequestConfigStruct,
+    val response: List<ResponseConfigStruct> = emptyList()
 )
 
 @Serializable
-data class RequestConfig(
+data class RequestConfigStruct(
     val method: HttpMethod,
     val params: Map<String, TemplateString>? = null,
     val headers: Map<String, TemplateString>? = null,
@@ -53,14 +53,14 @@ data class RequestConfig(
 )
 
 @Serializable
-data class ResponseConfig(
+data class ResponseConfigStruct(
     val httpCode: String,
     val type: MimeType,
-    val values: List<ResponseValue> = emptyList()
+    val values: List<ResponseValueStruct> = emptyList()
 )
 
 @Serializable
-data class ResponseValue(
+data class ResponseValueStruct(
     val name: String,
     val type: KnomadType,
     val path: String

@@ -35,9 +35,9 @@ sealed class KnomadType {
     }
 
     @Serializable
-    class Other(val key: kotlin.String) : KnomadType() {
+    class Custom(val typeName: kotlin.String) : KnomadType() {
         override fun toString(): kotlin.String {
-            return key
+            return typeName
         }
     }
 }
@@ -54,7 +54,7 @@ sealed class TemplateString {
     }
 
     @Serializable
-    class Struct(val struct: KnomadType.Other) : TemplateString()
+    class Struct(val struct: KnomadType.Custom) : TemplateString()
 }
 
 @Suppress("unused")
