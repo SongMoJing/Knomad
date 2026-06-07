@@ -1,5 +1,5 @@
 import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.model.KnomadConfig
+import top.song_mojing.knomad.model.KnomadConfigStruct
 import top.song_mojing.knomad.parser.yaml.YamlParser
 import top.song_mojing.knomad.parser.yaml.YamlParserException
 import kotlin.test.Test
@@ -12,7 +12,7 @@ class MainTest {
             val file = uri.readText(UTF_8)
             try {
                 val config = YamlParser.parser(file)
-                val encode = Yaml.encodeToString(KnomadConfig.serializer(), config)
+                val encode = Yaml.encodeToString(KnomadConfigStruct.serializer(), config)
                 println(encode)
             } catch (error: YamlParserException) {
                 error.validatorExceptions.forEach {

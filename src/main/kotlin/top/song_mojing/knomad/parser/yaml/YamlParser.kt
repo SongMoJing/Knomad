@@ -1,14 +1,15 @@
 package top.song_mojing.knomad.parser.yaml
 
 import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.model.KnomadConfig
+import top.song_mojing.knomad.model.KnomadConfigStruct
 import java.io.File
 
+@Suppress("unused")
 object YamlParser {
     fun parser(
         yamlFile: File,
         schemaFile: File
-    ): KnomadConfig {
+    ): KnomadConfigStruct {
         val yamlContent = yamlFile.readText()
         val schemaContent = schemaFile.readText()
         return parser(yamlContent, schemaContent)
@@ -16,7 +17,7 @@ object YamlParser {
 
     fun parser(
         yamlFile: File
-    ): KnomadConfig {
+    ): KnomadConfigStruct {
         val schemaContent = YamlParser::class.java.getResource("/schema.yaml")?.readText()
             ?: throw Exception("schema.yaml not found")
         return parser(yamlFile.readText(), schemaContent)
@@ -24,7 +25,7 @@ object YamlParser {
 
     fun parser(
         yamlContent: String
-    ): KnomadConfig {
+    ): KnomadConfigStruct {
         val schemaContent = YamlParser::class.java.getResource("/schema.yaml")?.readText()
             ?: throw Exception("schema.yaml not found")
         return parser(yamlContent, schemaContent)
@@ -33,12 +34,12 @@ object YamlParser {
     fun parser(
         yamlContent: String,
         schemaContent: String
-    ): KnomadConfig {
+    ): KnomadConfigStruct {
         val exceptions = YamlValidator.validate(schemaContent, yamlContent)
         if (exceptions.isNotEmpty()) {
             throw YamlParserException(exceptions)
         }
-        return Yaml.decodeFromString(KnomadConfig.serializer(), yamlContent)
+        return Yaml.decodeFromString(KnomadConfigStruct.serializer(), yamlContent)
     }
 }
 

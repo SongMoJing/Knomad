@@ -2,44 +2,59 @@ package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
 import net.mamoe.yamlkt.YamlElement
-import java.awt.datatransfer.MimeTypeParseException
 
-@Serializable(with = TypeSerializer::class)
-sealed class Type {
+@Serializable(with = BaseTypeSerializer::class)
+sealed class BaseType {
     @Serializable
-    class String : Type()
-
-    @Serializable
-    class Bool : Type()
+    class String : BaseType()
 
     @Serializable
-    class Int : Type()
+    class Bool : BaseType()
 
     @Serializable
-    class Float : Type()
+    class Int : BaseType()
 
     @Serializable
-    class List(val t1: Type) : Type() {
+    class Float : BaseType()
+
+    @Serializable
+    class List(val t1: BaseType) : BaseType() {
         override fun toString(): kotlin.String {
             return "List($t1)"
         }
     }
 
     @Serializable
-    class Object(val t1: Type, val t2: Type) : Type() {
+    class Object(val t1: BaseType, val t2: BaseType) : BaseType() {
         override fun toString(): kotlin.String {
             return "Object($t1, $t2)"
         }
     }
 
     @Serializable
-    class Other(val key: kotlin.String) : Type() {
+    class Other(val key: kotlin.String) : BaseType() {
         override fun toString(): kotlin.String {
             return key
         }
     }
 }
 
+@Serializable(with = TemplateStringSerializer::class)
+sealed class TemplateString {
+    @Serializable
+    class StringTemplate(val value: List<ValueItem>) : TemplateString() {
+        @Serializable
+        sealed class ValueItem {
+            class StringValue(val value: String) : ValueItem()
+            class Placeholder(val key: String, val value: String) : ValueItem()
+        }
+    }
+
+    @Serializable
+    class Struct(val struct: BaseType.Other) : TemplateString()
+}
+
+@Suppress("unused")
 @Serializable
 enum class HttpMethod {
     GET,
@@ -60,7 +75,7 @@ data class MimeType(
 )
 
 @Serializable
-data class KnomadConfig(
+data class KnomadConfigStruct(
     val variables: Map<String, Variable> = emptyMap(),
     val types: Map<String, CustomType> = emptyMap(),
     val baseUrl: String,
@@ -69,7 +84,7 @@ data class KnomadConfig(
 
 @Serializable
 data class Variable(
-    val type: Type,
+    val type: BaseType,
     val required: Boolean,
     val description: String? = null
 )
@@ -82,14 +97,14 @@ data class CustomType(
 
 @Serializable
 data class StructField(
-    val type: Type,
+    val type: BaseType,
     val description: String? = null,
     val struct: Map<String, StructField>? = null
 )
 
 @Serializable
 data class Endpoint(
-    val path: String,
+    val path: TemplateString,
     val request: RequestConfig,
     val response: List<ResponseConfig> = emptyList()
 )
@@ -97,8 +112,8 @@ data class Endpoint(
 @Serializable
 data class RequestConfig(
     val method: HttpMethod,
-    val params: Map<String, YamlElement>? = null,
-    val headers: Map<String, YamlElement>? = null,
+    val params: Map<String, TemplateString>? = null,
+    val headers: Map<String, TemplateString>? = null,
     val body: Map<String, YamlElement>? = null
 )
 
@@ -112,6 +127,6 @@ data class ResponseConfig(
 @Serializable
 data class ResponseValue(
     val name: String,
-    val type: Type,
+    val type: BaseType,
     val path: String
 )
