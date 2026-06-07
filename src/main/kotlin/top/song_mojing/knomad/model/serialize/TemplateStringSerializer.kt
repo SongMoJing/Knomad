@@ -12,8 +12,8 @@ import kotlin.text.get
 
 object TemplateStringSerializer : KSerializer<TemplateString> {
 
-    private val CONTAIN_PLACEHOLDER = Regex("""(?<!\\)\$\{\{(?:knomad')?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}""")
-    private val STRICT_PLACEHOLDER = Regex("""^(?<!\\)\{\{(?:knomad')?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}$""")
+    private val CONTAIN_PLACEHOLDER = Regex("""(?<!\\)\$\{\{(?:knomad@)?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}""")
+    private val STRICT_PLACEHOLDER = Regex("""^(?<!\\)\{\{(?:knomad@)?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}$""")
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("TemplateStringSerializer", PrimitiveKind.STRING)
 
@@ -47,12 +47,18 @@ object TemplateStringSerializer : KSerializer<TemplateString> {
 
     override fun serialize(encoder: Encoder, value: TemplateString) {
         val str = when (value) {
-            is TemplateString.Struct -> "{{knomad'${value.struct.key}}}"
+            is TemplateString.Struct -> "{{${
+                if (!value.struct.key.startsWith("knomad@")) "knomad@"
+                else ""
+            }${value.struct.key}}}"
             is TemplateString.StringTemplate -> {
                 value.value.joinToString("") { item ->
                     when (item) {
                         is TemplateString.StringTemplate.ValueItem.StringValue -> item.value
-                        is TemplateString.StringTemplate.ValueItem.Placeholder -> $$"${{knomad'$${item.key}.$${item.value}}}"
+                        is TemplateString.StringTemplate.ValueItem.Placeholder -> $$"${{$${
+                                if (!item.key.startsWith("knomad@")) "knomad@"
+                                else ""
+                        }$${item.key}.$${item.value}}}"
                     }
                 }
             }

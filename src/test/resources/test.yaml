@@ -2,76 +2,79 @@
 
 variables:
   ApiKey:
-    type: "String"
+    type: String
     required: true
-    description: "供应商的 API 密钥"
+    description: 供应商的 API 密钥
   Model:
-    type: "String"
+    type: String
     required: true
-    description: "需要调用的模型"
+    description: 需要调用的模型
   Content:
-    type: "List:Dialogue"
+    type: 'List:Dialogue'
     required: true
-    description: "对话列表"
-
+    description: 对话列表
 types:
   Dialogue:
-    description: "对话内容"
+    description: 对话内容
     struct:
       role:
-        type: "String"
+        type: String
+        description: null
+        struct: null
       content:
-        type: "String"
-
-baseUrl: "https://api.openai.com/v1"
-
+        type: String
+        description: null
+        struct: null
+baseUrl: 'https://api.openai.com/v1'
 endpoints:
   completions:
-    path: "/chat/completions"
+    path: '/chat/completions'
     request:
-      method: "POST"
+      method: POST
+      params: null
       headers:
-        Authorization: "Bearer ${{variables.ApiKey}}"
-        Content-Type: "application/json"
-        Accept: "application/json"
+        Authorization: "Bearer ${{knomad@variables.ApiKey}}"
+        'Content-Type': 'application/json'
+        Accept: 'application/json'
       body:
-        model: "${{variables.Model}}"
-        messages: "{{variables.Content}}"
+        model: "${{knomad@variables.Model}}"
+        messages: "{{knomad@variables.Content}}"
     response:
-      - httpCode: "type:success"
-        type: "appliction/json"
+      - httpCode: 'type:success'
+        type: 'appliction/json'
         values:
-          - name: "content"
-            type: "Dialogue"
+          - name: content
+            type: Dialogue
             path: '$.choices[0].message.content'
-      - httpCode: "code:403"
-        type: "appliction/json"
+      - httpCode: 'code:403'
+        type: 'appliction/json'
         values:
-          - name: "errMsg"
-            type: "String"
+          - name: errMsg
+            type: String
             path: '$.error.message'
   streamingCompletions:
-    path: "/chat/completions"
+    path: '/chat/completions'
     request:
-      method: "POST"
+      method: POST
+      params: null
       headers:
-        Authorization: "Bearer ${{variables.ApiKey}}"
-        Content-Type: "application/json"
-        Accept: "text/event-stream"
+        Authorization: "Bearer ${{knomad@variables.ApiKey}}"
+        'Content-Type': 'application/json'
+        Accept: 'text/event-stream'
       body:
-        model: "${{variables.Model}}"
-        messages: "{{variables.Content}}"
+        model: "${{knomad@variables.Model}}"
+        messages: "{{knomad@variables.Content}}"
         stream: true
     response:
-      - httpCode: "type:success"
-        type: "text/event-stream"
+      - httpCode: 'type:success'
+        type: 'text/event-stream'
         values:
-          - name: "content"
-            type: "Dialogue"
+          - name: content
+            type: Dialogue
             path: '$.choices[0].message.content'
-      - httpCode: "code:403"
-        type: "appliction/json"
+      - httpCode: 'code:403'
+        type: 'appliction/json'
         values:
-          - name: "errMsg"
-            type: "String"
+          - name: errMsg
+            type: String
             path: '$.error.message'
