@@ -20,7 +20,7 @@ object BaseTypeSerializer : KSerializer<KnomadType> {
         if (typeStr.startsWith("Map:")) {
             val parts = typeStr.substringAfter("Map:").split(",")
             if (parts.size == 2) {
-                return KnomadType.Object(parseBaseType(parts[0]), parseBaseType(parts[1]))
+                return KnomadType.Map(parseBaseType(parts[0]), parseBaseType(parts[1]))
             }
         }
         return parseBaseType(typeStr)
@@ -41,7 +41,7 @@ object BaseTypeSerializer : KSerializer<KnomadType> {
     override fun serialize(encoder: Encoder, value: KnomadType) {
         when (value) {
             is KnomadType.List -> encoder.encodeString("List:${value.t1}")
-            is KnomadType.Object -> encoder.encodeString("Map:${value.t1},${value.t2}")
+            is KnomadType.Map -> encoder.encodeString("Map:${value.t1},${value.t2}")
             is KnomadType.String -> encoder.encodeString("String")
             is KnomadType.Bool -> encoder.encodeString("Bool")
             is KnomadType.Int -> encoder.encodeString("Int")

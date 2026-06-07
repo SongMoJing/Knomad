@@ -38,7 +38,7 @@ data class StructField(
 
 @Serializable
 data class Endpoint(
-    val path: TemplateString,
+    val path: String,
     val request: RequestConfig,
     val response: List<ResponseConfig> = emptyList()
 )

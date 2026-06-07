@@ -17,7 +17,7 @@ definitions:
     pattern: '^[a-zA-Z0-9!#$%^&*_+-]+/[a-zA-Z0-9!#$%^&*_+-]+$'
   typeDefine:
     description: "类型声明"
-    enum: ["String", "Bool", "Int", "Float", "List", "Object"]
+    enum: ["String", "Bool", "Int", "Float", "List", "Map"]
   typeRequired:
     description: "类型要求"
     type: "string"
