@@ -2,6 +2,7 @@ package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
 import net.mamoe.yamlkt.YamlElement
+import java.awt.datatransfer.MimeTypeParseException
 
 @Serializable(with = TypeSerializer::class)
 sealed class Type {
@@ -40,11 +41,6 @@ sealed class Type {
 }
 
 @Serializable
-enum class ResponseType {
-    Json
-}
-
-@Serializable
 enum class HttpMethod {
     GET,
     POST,
@@ -56,6 +52,12 @@ enum class HttpMethod {
     TRACE,
     CONNECT,
 }
+
+@Serializable(with = MimeTypeSerializer::class)
+data class MimeType(
+    val type: String,
+    val subtype: String
+)
 
 @Serializable
 data class KnomadConfig(
@@ -103,7 +105,7 @@ data class RequestConfig(
 @Serializable
 data class ResponseConfig(
     val httpCode: String,
-    val type: ResponseType,
+    val type: MimeType,
     val values: List<ResponseValue> = emptyList()
 )
 

@@ -39,13 +39,38 @@ endpoints:
         messages: "{{variables.Content}}"
     response:
       - httpCode: "type:success"
-        type: "Json"
+        type: "appliction/json"
         values:
           - name: "content"
             type: "Dialogue"
             path: '$.choices[0].message.content'
       - httpCode: "code:403"
-        type: "Json"
+        type: "appliction/json"
+        values:
+          - name: "errMsg"
+            type: "String"
+            path: '$.error.message'
+  streamingCompletions:
+    path: "/chat/completions"
+    request:
+      method: "POST"
+      headers:
+        Authorization: "Bearer ${{variables.ApiKey}}"
+        Content-Type: "application/json"
+        Accept: "text/event-stream"
+      body:
+        model: "${{variables.Model}}"
+        messages: "{{variables.Content}}"
+        stream: true
+    response:
+      - httpCode: "type:success"
+        type: "text/event-stream"
+        values:
+          - name: "content"
+            type: "Dialogue"
+            path: '$.choices[0].message.content'
+      - httpCode: "code:403"
+        type: "appliction/json"
         values:
           - name: "errMsg"
             type: "String"

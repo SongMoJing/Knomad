@@ -8,8 +8,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 object TypeSerializer : KSerializer<Type> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("top.song_mojing.knomad.model.Type", PrimitiveKind.STRING)
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Type", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): Type {
         val typeStr = decoder.decodeString().trim()
