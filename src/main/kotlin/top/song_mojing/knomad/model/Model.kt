@@ -9,16 +9,16 @@ import top.song_mojing.knomad.model.serialize.TemplateStringSerializer
 @Serializable(with = BaseTypeSerializer::class)
 sealed class KnomadType {
     @Serializable
-    class String(val value: kotlin.String) : KnomadType()
+    class String : KnomadType()
 
     @Serializable
-    class Bool(val value: Boolean) : KnomadType()
+    class Bool : KnomadType()
 
     @Serializable
-    class Int(val value: kotlin.Long) : KnomadType()
+    class Int : KnomadType()
 
     @Serializable
-    class Float(val value: kotlin.Double) : KnomadType()
+    class Float : KnomadType()
 
     @Serializable
     class List(val t1: KnomadType) : KnomadType() {
@@ -28,9 +28,9 @@ sealed class KnomadType {
     }
 
     @Serializable
-    class Object(val t1: KnomadType, val t2: KnomadType) : KnomadType() {
+    class Map(val t1: KnomadType, val t2: KnomadType) : KnomadType() {
         override fun toString(): kotlin.String {
-            return "Object($t1, $t2)"
+            return "Map($t1, $t2)"
         }
     }
 

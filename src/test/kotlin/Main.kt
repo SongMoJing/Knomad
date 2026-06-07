@@ -1,5 +1,5 @@
 import net.mamoe.yamlkt.Yaml
-import top.song_mojing.knomad.model.KnomadConfigStruct
+import top.song_mojing.knomad.model.serialize.KnomadConfigStruct
 import top.song_mojing.knomad.parser.yaml.YamlParser
 import top.song_mojing.knomad.parser.yaml.YamlParserException
 import kotlin.test.Test
