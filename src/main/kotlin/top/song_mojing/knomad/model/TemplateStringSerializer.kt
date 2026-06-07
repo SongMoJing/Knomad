@@ -18,7 +18,7 @@ object TemplateStringSerializer : KSerializer<TemplateString> {
         return parseTemplateString(decoder.decodeString().trim())
     }
 
-    private fun parseTemplateString(input: String): TemplateString {
+    fun parseTemplateString(input: String): TemplateString {
         val structMatch = STRICT_PLACEHOLDER.find(input)
         if (structMatch != null) {
             return TemplateString.Struct(BaseType.Other(input.substring(2, input.length - 2)))

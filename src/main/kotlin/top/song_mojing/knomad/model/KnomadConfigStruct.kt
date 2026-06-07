@@ -2,6 +2,7 @@ package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
 import net.mamoe.yamlkt.YamlElement
+import top.song_mojing.knomad.model.serializer_ton.TonObjectSerializer
 
 @Serializable(with = BaseTypeSerializer::class)
 sealed class BaseType {
@@ -114,7 +115,8 @@ data class RequestConfig(
     val method: HttpMethod,
     val params: Map<String, TemplateString>? = null,
     val headers: Map<String, TemplateString>? = null,
-    val body: Map<String, YamlElement>? = null
+    @Serializable(with = TonObjectSerializer::class)
+    val body: TonObject? = null
 )
 
 @Serializable
