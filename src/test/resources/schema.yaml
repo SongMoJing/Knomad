@@ -33,7 +33,7 @@ definitions:
 properties:
   $schema:
     description: "引用的 Schema 文件路径"
-    type: "string"
+    type: ["string", "null"]
 
   # 全局变量声明
   variables:
@@ -44,7 +44,6 @@ properties:
       required:
         - "type"
         - "required"
-        - "description"
       properties:
         type:
           description: "变量的数据类型"
@@ -54,7 +53,7 @@ properties:
           type: "boolean"
         description:
           description: "变量的功能描述及含义"
-          type: "string"
+          type: ["string", "null"]
 
   # 自定义复合数据结构
   types:
@@ -81,9 +80,9 @@ properties:
                 description: "字段的数据类型"
                 $ref: "#/definitions/typeDefine"
               description:
-                type: "string"
+                type: ["string", "null"]
               struct:
-                type: "object"
+                type: ["object", "null"]
                 additionalProperties:
                   $ref: "#/properties/types/additionalProperties/properties/struct/additionalProperties"
 
@@ -121,10 +120,10 @@ properties:
               enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE", "CONNECT"]
             params:
               description: "URL Query 拼接参数"
-              type: "object"
+              type: ["object", "null"]
             headers:
               description: "HTTP 请求头"
-              type: "object"
+              type: ["object", "null"]
               properties:
                 Accept:
                   description: "Accept 响应头"
@@ -137,7 +136,7 @@ properties:
                   $ref: "#/definitions/mimeType"
             body:
               description: "HTTP 请求体"
-              type: "object"
+              type: ["object", "null"]
 
         # HTTP 响应报文定义
         response:

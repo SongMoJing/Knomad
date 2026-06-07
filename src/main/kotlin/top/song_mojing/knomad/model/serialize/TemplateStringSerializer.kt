@@ -12,8 +12,8 @@ import kotlin.text.get
 
 object TemplateStringSerializer : KSerializer<TemplateString> {
 
-    private val CONTAIN_PLACEHOLDER = Regex("""(?<!\\)\$\{\{(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}""")
-    private val STRICT_PLACEHOLDER = Regex("""^(?<!\\)\{\{(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}$""")
+    private val CONTAIN_PLACEHOLDER = Regex("""(?<!\\)\$\{\{(?:knomad')?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}""")
+    private val STRICT_PLACEHOLDER = Regex("""^(?<!\\)\{\{(?:knomad')?(?<key>[a-zA-Z]+)\.(?<value>[a-zA-Z][a-zA-Z0-9_]+)}}$""")
 
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("TemplateStringSerializer", PrimitiveKind.STRING)
 
