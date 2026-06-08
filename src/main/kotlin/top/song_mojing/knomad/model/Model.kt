@@ -54,7 +54,10 @@ sealed class TemplateString {
     }
 
     @Serializable
-    class Struct(val struct: KnomadType.Custom) : TemplateString()
+    class Struct(
+        val key: String,
+        val value: String
+    ) : TemplateString()
 }
 
 @Suppress("unused")

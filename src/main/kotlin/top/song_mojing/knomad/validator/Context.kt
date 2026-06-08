@@ -1,11 +1,13 @@
 package top.song_mojing.knomad.validator
 
 import top.song_mojing.knomad.model.*
+import top.song_mojing.knomad.model.serialize.CustomTypeStruct
 import top.song_mojing.knomad.model.serialize.VariableStruct
 
 class Context(
     variableMapper: Map<String, Any>,
-    variables: Map<String, VariableStruct>
+    variables: Map<String, VariableStruct>,
+    typeDefinition: Map<String, CustomTypeStruct>,
 ) {
 
     var variables: MutableMap<String, Variable> = mutableMapOf()
@@ -13,20 +15,19 @@ class Context(
     init {
         this.variables = variables
             .mapValues { (key, value) ->
-                Variable(
+                val variable = Variable(
                     value.type.new(variableMapper[key]),
                     value.required,
                     value.description
                 )
+                if (variable.required) {
+                    if (variable.value == KnomadValue.Undefined) {
+                        throw RuntimeException("Variable $key is required, but not provided.")
+                    }
+                }
+                return@mapValues variable
             }
             .toMutableMap()
-        this.variables.forEach { (key, value) ->
-            if (value.required) {
-                if (value.value == KnomadValue.Undefined) {
-                    throw RuntimeException("Variable $key is required, but not provided.")
-                }
-            }
-        }
     }
 
     fun getVariableValue(key: String): String? {
@@ -77,7 +78,11 @@ fun TemplateString.parse(context: Context): String {
         }
 
         is TemplateString.Struct -> {
-            this.struct.typeName
+            when (this.key) {
+                "variables" -> context.getVariableValue(this.value)
+                "env" -> System.getenv(this.value)
+                else -> null
+            } ?: "null"
         }
     }
 }
