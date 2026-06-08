@@ -1,13 +1,11 @@
 package top.song_mojing.knomad.validator
 
 import top.song_mojing.knomad.model.*
-import top.song_mojing.knomad.model.serialize.CustomTypeStruct
 import top.song_mojing.knomad.model.serialize.VariableStruct
 
 class Context(
-    variableMapper: Map<String, Any>,
-    variables: Map<String, VariableStruct>,
-    typeDefinition: Map<String, CustomTypeStruct>,
+    variableMapper: Map<String, KnomadValue>,
+    variables: Map<String, VariableStruct>
 ) {
 
     var variables: MutableMap<String, Variable> = mutableMapOf()
@@ -16,9 +14,9 @@ class Context(
         this.variables = variables
             .mapValues { (key, value) ->
                 val variable = Variable(
-                    value.type.new(variableMapper[key]),
-                    value.required,
-                    value.description
+                    value = variableMapper[key] ?: KnomadValue.Undefined,
+                    required = value.required,
+                    description = value.description
                 )
                 if (variable.required) {
                     if (variable.value == KnomadValue.Undefined) {
@@ -43,30 +41,23 @@ data class Variable(
 
 fun TonItem.parse(context: Context): TonItem {
     return when (this) {
-        is TonObject -> {
-            TonObject(fields.mapValues { it.value.parse(context) })
-        }
+        is TonObject -> TonObject(this.mapValues { it.value.parse(context) })
 
-        is TonArray -> {
-            TonArray(items.map { it.parse(context) })
-        }
+        is TonArray -> TonArray(this.map { it.parse(context) })
 
-        is TonString -> {
-            val resolvedString = this.value.parse(context)
-            resolvedString.toTonString()
-        }
+        is TonString -> this.value.parse(context).toTonString()
 
         else -> this
     }
 }
 
-fun TemplateString.parse(context: Context): String {
+fun Template.parse(context: Context): String {
     return when (this) {
-        is TemplateString.StringTemplate -> {
+        is Template.StringTemplate -> {
             value.joinToString("") { item ->
                 when (item) {
-                    is TemplateString.StringTemplate.ValueItem.StringValue -> item.value
-                    is TemplateString.StringTemplate.ValueItem.Placeholder -> {
+                    is Template.StringTemplate.ValueItem.StringValue -> item.value
+                    is Template.StringTemplate.ValueItem.Placeholder -> {
                         when (item.key) {
                             "variables" -> context.getVariableValue(item.value)
                             "env" -> System.getenv(item.value)
@@ -77,7 +68,7 @@ fun TemplateString.parse(context: Context): String {
             }
         }
 
-        is TemplateString.Struct -> {
+        is Template.Struct -> {
             when (this.key) {
                 "variables" -> context.getVariableValue(this.value)
                 "env" -> System.getenv(this.value)

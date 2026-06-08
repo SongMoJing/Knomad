@@ -1,4 +1,4 @@
-package top.song_mojing.knomad.model.serialize.serializer_ton
+package top.song_mojing.knomad.model.serializer
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -7,15 +7,7 @@ import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import net.mamoe.yamlkt.*
-import top.song_mojing.knomad.model.serialize.TemplateStringSerializer
-import top.song_mojing.knomad.model.TonArray
-import top.song_mojing.knomad.model.TonBoolean
-import top.song_mojing.knomad.model.TonItem
-import top.song_mojing.knomad.model.TonNull
-import top.song_mojing.knomad.model.TonNumber
-import top.song_mojing.knomad.model.TonObject
-import top.song_mojing.knomad.model.TonString
-import kotlin.collections.iterator
+import top.song_mojing.knomad.model.*
 
 object TonItemSerializer : KSerializer<TonItem> {
 
@@ -26,10 +18,11 @@ object TonItemSerializer : KSerializer<TonItem> {
         when (value) {
             is TonObject -> TonObjectSerializer.serialize(encoder, value)
             is TonArray -> TonArraySerializer.serialize(encoder, value)
-            is TonString -> TemplateStringSerializer.serialize(encoder, value.value)
-            is TonNumber -> TonNumberSerializer.serialize(encoder, value)
+            is TonString -> TemplateSerializer.serialize(encoder, value.value)
+            is TonNumber -> NumberSerializer.serialize(encoder, value.value)
             is TonBoolean -> encoder.encodeBoolean(value.value)
             is TonNull -> encoder.encodeNull()
+            is TonTemplate -> TemplateSerializer.serialize(encoder, value.value)
         }
     }
 
@@ -55,12 +48,18 @@ object TonItemSerializer : KSerializer<TonItem> {
             is YamlPrimitive -> {
                 val content = element.content ?: ""
                 if (content.contains("{{")) {
-                    TonString(TemplateStringSerializer.parseTemplateString(content))
+                    when (val value = TemplateSerializer.parseTemplateString(content)) {
+                        is Template.StringTemplate -> TonString(value)
+                        is Template.Struct -> TonTemplate(value)
+                    }
                 } else {
                     content.toBooleanStrictOrNull()?.let { TonBoolean(it) }
-                        ?: content.toLongOrNull()?.let { TonNumber(it) }
-                        ?: content.toDoubleOrNull()?.let { TonNumber(it) }
-                        ?: TonString(TemplateStringSerializer.parseTemplateString(content))
+                        ?: content.toLongOrNull()?.let { TonNumber(NumberWrapper(it)) }
+                        ?: content.toDoubleOrNull()?.let { TonNumber(NumberWrapper(it)) }
+                        ?: when (val value = TemplateSerializer.parseTemplateString(content)) {
+                            is Template.StringTemplate -> TonString(value)
+                            is Template.Struct -> TonTemplate(value)
+                        }
                 }
             }
         }

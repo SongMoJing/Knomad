@@ -4,15 +4,15 @@ import kotlinx.serialization.Serializable
 import top.song_mojing.knomad.model.KnomadType
 import top.song_mojing.knomad.model.HttpMethod
 import top.song_mojing.knomad.model.MimeType
-import top.song_mojing.knomad.model.TemplateString
+import top.song_mojing.knomad.model.Template
 import top.song_mojing.knomad.model.TonObject
-import top.song_mojing.knomad.model.serialize.serializer_ton.TonObjectSerializer
+import top.song_mojing.knomad.model.serializer.TonObjectSerializer
 
 @Serializable
 data class KnomadConfigStruct(
-    val variables: Map<String, VariableStruct> = emptyMap(),
-    val types: Map<String, CustomTypeStruct> = emptyMap(),
+    val version: String,
     val baseUrl: String,
+    val variables: Map<String, VariableStruct> = emptyMap(),
     val endpoints: Map<String, EndpointStruct> = emptyMap()
 )
 
@@ -24,30 +24,21 @@ data class VariableStruct(
 )
 
 @Serializable
-data class CustomTypeStruct(
-    val description: String? = null,
-    val struct: Map<String, TypeStructFieldStruct> = emptyMap()
-)
-
-@Serializable
-data class TypeStructFieldStruct(
-    val type: KnomadType,
-    val description: String? = null,
-    val struct: Map<String, TypeStructFieldStruct>? = null
-)
-
-@Serializable
 data class EndpointStruct(
     val path: String,
+    val methods: Map<HttpMethod, EndpointOperationStruct>
+)
+
+@Serializable
+data class EndpointOperationStruct(
     val request: RequestConfigStruct,
     val response: List<ResponseConfigStruct> = emptyList()
 )
 
 @Serializable
 data class RequestConfigStruct(
-    val method: HttpMethod,
-    val params: Map<String, TemplateString>? = null,
-    val headers: Map<String, TemplateString>? = null,
+    val query: Map<String, Template>? = null,
+    val headers: Map<String, Template>? = null,
     @Serializable(with = TonObjectSerializer::class)
     val body: TonObject? = null
 )

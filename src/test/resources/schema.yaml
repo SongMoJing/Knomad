@@ -1,38 +1,106 @@
 # 元数据与全局配置
 $schema: "http://json-schema.org/draft-07/schema#"
 title: "API Definition Schema"
-description: "自定义 API 描述文件的校验 Schema，支持基础类型、List 和 Map 嵌套"
+description: "自定义 API 描述文件的校验 Schema"
 type: "object"
 required:
+  - "version"
   - "variables"
   - "baseUrl"
   - "endpoints"
 
 # 全局复用类型定义
 definitions:
+  httpMethod:
+    enum: [ "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS" ]
+  httpMethodDefinition:
+    type: "object"
+    required:
+      - "request"
+      - "response"
+    properties:
+      # HTTP 请求报文定义
+      request:
+        description: "请求体定义"
+        type: "object"
+        properties:
+          query:
+            description: "URL Query 拼接参数"
+            type: [ "object", "null" ]
+          headers:
+            description: "HTTP 请求头"
+            type: [ "object", "null" ]
+            properties:
+              Accept:
+                description: "Accept 响应头"
+                $ref: "#/definitions/mimeType"
+              Authorization:
+                description: "Authorization 请求头"
+                type: "string"
+              Content-Type:
+                description: "Content-Type 请求头"
+                $ref: "#/definitions/mimeType"
+          body:
+            description: "HTTP 请求体"
+            type: [ "object", "null" ]
+      # HTTP 响应报文定义
+      response:
+        description: "响应体定义列表，针对不同的 HTTP 状态码定义不同的解析规则"
+        type: "array"
+        items:
+          type: "object"
+          required:
+            - "httpCode"
+            - "type"
+            - "values"
+          properties:
+            httpCode:
+              description: "HTTP 匹配状态码或特定标识"
+              type: "string"
+              pattern: '^(code:\d+|type:(success|failed))$'
+            type:
+              description: "返回的数据格式"
+              $ref: "#/definitions/mimeType"
+            values:
+              description: "从响应体中提取目标数据的 JSONPath 映射规则列表"
+              type: "array"
+              items:
+                type: "object"
+                required:
+                  - "name"
+                  - "type"
+                  - "path"
+                properties:
+                  name:
+                    description: "提取出来后赋给的内部变量名/字段名"
+                    type: "string"
+                  type:
+                    description: "提取出的目标数据的数据类型"
+                    $ref: "#/definitions/typeDefine"
+                  path:
+                    description: "定位数据的 JSONPath 表达式"
+                    type: "string"
   mimeType:
     description: "MIME 类型"
     type: "string"
     pattern: '^[a-zA-Z0-9!#$%^&*_+-]+/[a-zA-Z0-9!#$%^&*_+-]+$'
   typeDefine:
     description: "类型声明"
-    enum: ["String", "Bool", "Int", "Float", "List", "Map"]
+    enum: ["String", "Boolean", "Number", "List", "Map"]
   typeRequired:
     description: "类型要求"
-    type: "string"
-    anyOf:
-      - enum: ["String", "Bool", "Int", "Float"]
-        description: "标准基础数据类型"
-      - pattern: '^List:[a-zA-Z0-9_]+$'
-        description: "数组类型，格式如：List:Xxx"
-      - pattern: '^Map:[a-zA-Z0-9_]+,[a-zA-Z0-9_]+$'
-        description: "键值对类型，格式如：Map:Xxx,Yyy"
+    enum: ["String", "Boolean", "Number", "List", "Map"]
 
 # 主体属性定义
 properties:
   $schema:
     description: "引用的 Schema 文件路径"
     type: ["string", "null"]
+
+  version:
+    description: "API 描述文件的版本"
+    type: "string"
+    pattern: '^v\d+\.\d+(\.\d+)?$'
 
   # 全局变量声明
   variables:
@@ -54,42 +122,11 @@ properties:
           description: "变量的功能描述及含义"
           type: ["string", "null"]
 
-  # 自定义复合数据结构
-  types:
-    description: "自定义复合数据结构"
-    type: ["object", "null"]
-    additionalProperties:
-      type: "object"
-      required:
-        - "description"
-        - "struct"
-      properties:
-        description:
-          description: "当前自定义结构的总体用途说明"
-          type: "string"
-        struct:
-          description: "结构体内部的具体字段映射表"
-          type: "object"
-          additionalProperties:
-            type: "object"
-            required:
-              - "type"
-            properties:
-              type:
-                description: "字段的数据类型"
-                $ref: "#/definitions/typeDefine"
-              description:
-                type: ["string", "null"]
-              struct:
-                type: ["object", "null"]
-                additionalProperties:
-                  $ref: "#/properties/types/additionalProperties/properties/struct/additionalProperties"
-
   # API 基础请求路径
   baseUrl:
     description: "网关或服务的 API 基础请求域名/路径"
     type: "string"
-    pattern: "^https?://.+$"
+    pattern: '^https?://.+$'
 
   # 具体 API 端点配置
   endpoints:
@@ -99,78 +136,21 @@ properties:
       type: "object"
       required:
         - "path"
-        - "request"
-        - "response"
+        - "methods"
+      additionalProperties: false
       properties:
         path:
           description: "接口的相对路由路径"
           type: "string"
-
-        # HTTP 请求报文定义
-        request:
-          description: "请求体定义"
+        methods:
+          description: "接口支持的 HTTP 方法"
           type: "object"
-          required:
-            - "method"
           properties:
-            method:
-              description: "HTTP 方法"
-              type: "string"
-              enum: ["GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "TRACE", "CONNECT"]
-            params:
-              description: "URL Query 拼接参数"
-              type: ["object", "null"]
-            headers:
-              description: "HTTP 请求头"
-              type: ["object", "null"]
-              properties:
-                Accept:
-                  description: "Accept 响应头"
-                  $ref: "#/definitions/mimeType"
-                Authorization:
-                  description: "Authorization 请求头"
-                  type: "string"
-                Content-Type:
-                  description: "Content-Type 请求头"
-                  $ref: "#/definitions/mimeType"
-            body:
-              description: "HTTP 请求体"
-              type: ["object", "null"]
-
-        # HTTP 响应报文定义
-        response:
-          description: "响应体定义列表，针对不同的 HTTP 状态码定义不同的解析规则"
-          type: "array"
-          items:
-            type: "object"
-            required:
-              - "httpCode"
-              - "type"
-              - "values"
-            properties:
-              httpCode:
-                description: "HTTP 匹配状态码或特定标识"
-                type: "string"
-                pattern: '^(code:\d+|type:(success|failed))$'
-              type:
-                description: "返回的数据格式"
-                $ref: "#/definitions/mimeType"
-              values:
-                description: "从响应体中提取目标数据的 JSONPath 映射规则列表"
-                type: "array"
-                items:
-                  type: "object"
-                  required:
-                    - "name"
-                    - "type"
-                    - "path"
-                  properties:
-                    name:
-                      description: "提取出来后赋给的内部变量名/字段名"
-                      type: "string"
-                    type:
-                      description: "提取出的目标数据的数据类型"
-                      type: "string"
-                    path:
-                      description: "定位数据的 JSONPath 表达式"
-                      type: "string"
+            GET: { $ref: "#/definitions/httpMethodDefinition" }
+            POST: { $ref: "#/definitions/httpMethodDefinition" }
+            PUT: { $ref: "#/definitions/httpMethodDefinition" }
+            DELETE: { $ref: "#/definitions/httpMethodDefinition" }
+            PATCH: { $ref: "#/definitions/httpMethodDefinition" }
+            HEAD: { $ref: "#/definitions/httpMethodDefinition" }
+            OPTIONS: { $ref: "#/definitions/httpMethodDefinition" }
+          minProperties: 1

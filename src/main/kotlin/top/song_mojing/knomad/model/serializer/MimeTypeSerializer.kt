@@ -1,4 +1,4 @@
-package top.song_mojing.knomad.model.serialize
+package top.song_mojing.knomad.model.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

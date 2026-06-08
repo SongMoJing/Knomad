@@ -1,51 +1,28 @@
 package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
-import top.song_mojing.knomad.model.serialize.BaseTypeSerializer
-import top.song_mojing.knomad.model.serialize.MimeTypeSerializer
-import top.song_mojing.knomad.model.serialize.TemplateStringSerializer
+import top.song_mojing.knomad.model.serializer.KnomadTypeSerializer
+import top.song_mojing.knomad.model.serializer.MimeTypeSerializer
+import top.song_mojing.knomad.model.serializer.TemplateSerializer
 
-
-@Serializable(with = BaseTypeSerializer::class)
+@Serializable(with = KnomadTypeSerializer::class)
 sealed class KnomadType {
     @Serializable
     class String : KnomadType()
-
     @Serializable
-    class Bool : KnomadType()
-
+    class Boolean : KnomadType()
     @Serializable
-    class Int : KnomadType()
-
+    class Number : KnomadType()
     @Serializable
-    class Float : KnomadType()
-
+    class List : KnomadType()
     @Serializable
-    class List(val t1: KnomadType) : KnomadType() {
-        override fun toString(): kotlin.String {
-            return "List($t1)"
-        }
-    }
-
-    @Serializable
-    class Map(val t1: KnomadType, val t2: KnomadType) : KnomadType() {
-        override fun toString(): kotlin.String {
-            return "Map($t1, $t2)"
-        }
-    }
-
-    @Serializable
-    class Custom(val typeName: kotlin.String) : KnomadType() {
-        override fun toString(): kotlin.String {
-            return typeName
-        }
-    }
+    class Map : KnomadType()
 }
 
-@Serializable(with = TemplateStringSerializer::class)
-sealed class TemplateString {
+@Serializable(with = TemplateSerializer::class)
+sealed class Template {
     @Serializable
-    class StringTemplate(val value: List<ValueItem>) : TemplateString() {
+    class StringTemplate(val value: List<ValueItem>) : Template() {
         @Serializable
         sealed class ValueItem {
             class StringValue(val value: String) : ValueItem()
@@ -57,7 +34,7 @@ sealed class TemplateString {
     class Struct(
         val key: String,
         val value: String
-    ) : TemplateString()
+    ) : Template()
 }
 
 @Suppress("unused")

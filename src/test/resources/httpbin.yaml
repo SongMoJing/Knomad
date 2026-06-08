@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=schema.yaml
-
+version: 'v1.0.0'
 variables:
   Authorization:
     type: String
@@ -13,46 +13,48 @@ baseUrl: 'http://127.0.0.1:8080'
 endpoints:
   get:
     path: '/get'
-    request:
-      method: GET
-      headers:
-        Authorization: "Bearer ${{variables.Authorization}}"
-        'Content-Type': 'application/json'
-        Accept: 'application/json'
-    response:
-      - httpCode: 'type:success'
-        type: 'appliction/json'
-        values:
-          - name: content
-            type: Dialogue
-            path: '$.choices[0].message.content'
-      - httpCode: 'code:403'
-        type: 'appliction/json'
-        values:
-          - name: errMsg
-            type: String
-            path: '$.error.message'
+    GET:
+      request:
+        params:
+          Query1: 'Hello'
+        headers:
+          Authorization: "Bearer ${{variables.Authorization}}"
+          'Content-Type': 'application/json'
+          Accept: 'application/json'
+      response:
+        - httpCode: 'type:success'
+          type: 'appliction/json'
+          values:
+            - name: content
+              type: Dialogue
+              path: '$.choices[0].message.content'
+        - httpCode: 'code:403'
+          type: 'appliction/json'
+          values:
+            - name: errMsg
+              type: String
+              path: '$.error.message'
   post:
     path: '/post'
-    request:
-      method: POST
-      params: null
-      headers:
-        Authorization: "Bearer ${{variables.Authorization}}"
-        'Content-Type': 'application/json'
-        Accept: 'text/event-stream'
-      body:
-        data: '${{variables.Content}}'
-    response:
-      - httpCode: 'type:success'
-        type: 'text/event-stream'
-        values:
-          - name: content
-            type: Dialogue
-            path: '$.choices[0].message.content'
-      - httpCode: 'code:403'
-        type: 'appliction/json'
-        values:
-          - name: errMsg
-            type: String
-            path: '$.error.message'
+    POST:
+      request:
+        params: null
+        headers:
+          Authorization: "Bearer ${{variables.Authorization}}"
+          'Content-Type': 'application/json'
+          Accept: 'text/event-stream'
+        body:
+          data: '${{variables.Content}}'
+      response:
+        - httpCode: 'type:success'
+          type: 'text/event-stream'
+          values:
+            - name: content
+              type: Dialogue
+              path: '$.choices[0].message.content'
+        - httpCode: 'code:403'
+          type: 'appliction/json'
+          values:
+            - name: errMsg
+              type: String
+              path: '$.error.message'

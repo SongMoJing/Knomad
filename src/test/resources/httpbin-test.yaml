@@ -1,74 +1,74 @@
 # yaml-language-server: $schema=schema.yaml
-
+version: 'v1.0.0'
 variables:
   Model:
     type: String
     required: true
     description: 需要调用的模型
+  Count:
+    type: Number
+    required: true
+    description: 生成数量
+  TRUE:
+    type: Boolean
+    required: true
+    description: 是否返回概率
   Content:
-    type: 'List:Dialogue'
+    type: List
     required: true
     description: 对话列表
-types:
-  Dialogue:
-    description: 对话内容
-    struct:
-      role:
-        type: String
-        description: null
-        struct: null
-      content:
-        type: String
-        description: null
-        struct: null
 baseUrl: 'http://127.0.0.1:8080'
 endpoints:
   completions:
     path: '/post'
-    request:
-      method: POST
-      headers:
-        Authorization: "Bearer ${{env.ApiKey}}"
-        'Content-Type': 'application/json'
-        Accept: 'application/json'
-      body:
-        model: "${{variables.Model}}"
-        messages: "{{variables.Content}}"
-    response:
-      - httpCode: 'type:success'
-        type: 'appliction/json'
-        values:
-          - name: content
-            type: Dialogue
-            path: '$.choices[0].message.content'
-      - httpCode: 'code:403'
-        type: 'appliction/json'
-        values:
-          - name: errMsg
-            type: String
-            path: '$.error.message'
+    methods:
+      POST:
+        request:
+          headers:
+            Authorization: "Bearer ${{env.ApiKey}}"
+            'Content-Type': 'application/json'
+            Accept: 'application/json'
+          body:
+            model: "${{variables.Model}}"
+            messages: "{{variables.Content}}"
+            count: "${{variables.Count}}"
+            true: "${{variables.TRUE}}"
+        response:
+          - httpCode: 'type:success'
+            type: 'appliction/json'
+            values:
+              - name: content
+                type: Map
+                path: '$.choices[0].message.content'
+          - httpCode: 'code:403'
+            type: 'appliction/json'
+            values:
+              - name: errMsg
+                type: String
+                path: '$.error.message'
 #  streamingCompletions:
 #    path: '/chat/completions'
-#    request:
-#      method: POST
-#      headers:
-#        Authorization: "Bearer ${{env.ApiKey}}"
-#        'Content-Type': 'application/json'
-#        Accept: 'text/event-stream'
-#      body:
-#        model: "${{variables.Model}}"
-#        messages: "{{variables.Content}}"
-#        stream: true
-#    response:
-#      - httpCode: 'type:success'
-#        type: 'text/event-stream'
-#        values:
-#          - name: content
-#            type: Dialogue
-#            path: '$.choices[0].message.content'
-#      - httpCode: 'code:403'
-#        type: 'appliction/json'
-#        values:
-#          - name: errMsg
-#            type: String
-#            path: '$.error.message'
+#    methods:
+#      POST:
+#        request:
+#          headers:
+#            Authorization: "Bearer ${{env.ApiKey}}"
+#            'Content-Type': 'application/json'
+#            Accept: 'text/event-stream'
+#          body:
+#            model: "${{variables.Model}}"
+#            messages: "{{variables.Content}}"
+#            stream: true
+#        response:
+#          - httpCode: 'type:success'
+#            type: 'text/event-stream'
+#            values:
+#              - name: content
+#                type: Map
+#                path: '$.choices[0].message.content'
+#          - httpCode: 'code:403'
+#            type: 'appliction/json'
+#            values:
+#              - name: errMsg
+#                type: String
+#                path: '$.error.message'

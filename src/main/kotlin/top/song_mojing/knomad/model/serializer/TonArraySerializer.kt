@@ -1,4 +1,4 @@
-package top.song_mojing.knomad.model.serialize.serializer_ton
+package top.song_mojing.knomad.model.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.ListSerializer
@@ -13,5 +13,5 @@ object TonArraySerializer : KSerializer<TonArray> {
     override val descriptor = listSerializer.descriptor
 
     override fun deserialize(decoder: Decoder) = TonArray(decoder.decodeSerializableValue(listSerializer))
-    override fun serialize(encoder: Encoder, value: TonArray) = encoder.encodeSerializableValue(listSerializer, value.items)
+    override fun serialize(encoder: Encoder, value: TonArray) = encoder.encodeSerializableValue(listSerializer, value)
 }

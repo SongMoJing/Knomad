@@ -1,10 +1,11 @@
 package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
-import top.song_mojing.knomad.model.serialize.serializer_ton.TonArraySerializer
-import top.song_mojing.knomad.model.serialize.serializer_ton.TonItemSerializer
-import top.song_mojing.knomad.model.serialize.serializer_ton.TonNumberSerializer
-import top.song_mojing.knomad.model.serialize.serializer_ton.TonObjectSerializer
+import top.song_mojing.knomad.model.serializer.NumberWrapper
+import top.song_mojing.knomad.model.serializer.TonArraySerializer
+import top.song_mojing.knomad.model.serializer.TonItemSerializer
+import top.song_mojing.knomad.model.serializer.TonObjectSerializer
+import java.util.function.IntFunction
 
 /**
  * 模板对象
@@ -13,57 +14,57 @@ import top.song_mojing.knomad.model.serialize.serializer_ton.TonObjectSerializer
 sealed class TonItem
 
 @Serializable(with = TonObjectSerializer::class)
-class TonObject(var fields: Map<String, TonItem>): TonItem()
-
-@JvmName("tonObjectOfItems")
-fun tonObjectOf(vararg fields: Pair<String, TonItem>): TonObject {
-    return TonObject(fields.toMap())
-}
-
-@JvmName("tonObjectOfStrings")
-fun tonObjectOf(vararg fields: Pair<String, String>): TonObject {
-    return TonObject(
-        fields.associate { (key, value) ->
-            key to value.toTonString()
-        }
-    )
-}
+class TonObject(private val fields: Map<String, TonItem>) : TonItem(), Map<String, TonItem> by fields
 
 @Serializable(with = TonArraySerializer::class)
-class TonArray(var items: List<TonItem>): TonItem()
-
-fun tonArrayOf(vararg items: TonItem): TonArray {
-    return TonArray(items.toList())
+class TonArray(private val items: List<TonItem>) : TonItem(), List<TonItem> by items {
+    @Suppress("DEPRECATION")
+    @Deprecated("该方法已废弃，不建议在 TonArray 中使用")
+    override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super.toArray(generator)
 }
 
 /**
  * 模板对象值
  */
 @Serializable
-sealed class TonValue: TonItem()
+sealed class TonValue : TonItem()
 
 @Serializable
-class TonString(var value: TemplateString) : TonValue()
+class TonString(var value: Template.StringTemplate) : TonValue()
+
+@Serializable
+class TonTemplate(var value: Template.Struct) : TonValue()
+
+@Serializable
+class TonNumber(var value: NumberWrapper) : TonValue()
+
+@Serializable
+class TonBoolean(var value: Boolean) : TonValue()
+
+@Serializable
+class TonNull : TonValue()
+
+fun tonArrayOf(vararg items: TonItem): TonArray = TonArray(items.toList())
+
+@JvmName("tonObjectOfItems")
+fun tonObjectOf(vararg fields: Pair<String, TonItem>): TonObject = TonObject(fields.toMap())
+
+@JvmName("tonObjectOfStrings")
+fun tonObjectOf(vararg fields: Pair<String, String>): TonObject = TonObject(
+    fields.associate { (key, value) ->
+        key to value.toTonString()
+    }
+)
 
 @JvmName("tonStringOfString")
 fun String.toTonString(): TonString {
     return TonString(
-        TemplateString.StringTemplate(
+        Template.StringTemplate(
             listOf(
-                TemplateString.StringTemplate.ValueItem.StringValue(
+                Template.StringTemplate.ValueItem.StringValue(
                     this
                 )
             )
         )
     )
 }
-
-@Serializable(with = TonNumberSerializer::class)
-class TonNumber(var value: Number): TonValue()
-
-@Serializable
-class TonBoolean(var value: Boolean): TonValue()
-
-@Serializable
-class TonNull: TonValue()
-

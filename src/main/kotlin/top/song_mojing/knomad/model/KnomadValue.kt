@@ -1,119 +1,58 @@
 package top.song_mojing.knomad.model
 
-import top.song_mojing.knomad.model.KnomadValue.*
-import top.song_mojing.knomad.validator.Context
-import top.song_mojing.knomad.validator.parse
+import kotlinx.serialization.Serializable
+import top.song_mojing.knomad.model.serializer.NumberSerializer
+import java.util.function.IntFunction
 
+@Serializable
 sealed class KnomadValue {
+    @Serializable
     class String(val value: kotlin.String) : KnomadValue() {
         override fun toString(): kotlin.String = value
     }
-
+    @Serializable
     class Boolean(val value: kotlin.Boolean) : KnomadValue() {
         override fun toString(): kotlin.String = value.toString()
     }
-
-    class Integer(val value: Long) : KnomadValue() {
-        override fun toString(): kotlin.String = value.toString()
+    @Serializable
+    class Number(@Serializable(with = NumberSerializer::class) val value: kotlin.Number) : KnomadValue()
+    @Serializable
+    class List(val value: kotlin.collections.List<KnomadValue>) : KnomadValue(), kotlin.collections.List<KnomadValue> by value {
+        @Suppress("DEPRECATION")
+        @Deprecated("该方法已废弃，不建议在 TonArray 中使用")
+        override fun <T> toArray(generator: IntFunction<Array<out T?>?>): Array<out T?>? = super.toArray(generator)
     }
-
-    class Float(val value: Double) : KnomadValue() {
-        override fun toString(): kotlin.String = value.toString()
-    }
-
-    class List(
-        val value: kotlin.collections.List<KnomadValue>
-    ) : KnomadValue() {
-        override fun toString(): kotlin.String {
-            return "[${value.joinToString { "\"$it\"" }}]"
-        }
-    }
-
-    class Map(
-        val value: kotlin.collections.Map<KnomadValue, KnomadValue>,
-    ) : KnomadValue() {
-        override fun toString(): kotlin.String {
-            return "{${value.map { "\"${it.key}\": \"${it.value}\"" }.joinToString()}}"
-        }
-    }
-
-    class Other(val key: kotlin.String) : KnomadValue() {
-        override fun toString(): kotlin.String {
-            return key
-        }
-    }
-
+    @Serializable
+    class Map(val value: kotlin.collections.Map<KnomadValue, KnomadValue>) : KnomadValue(), kotlin.collections.Map<KnomadValue, KnomadValue> by value
+    @Serializable
     object Null : KnomadValue() {
         override fun toString(): kotlin.String = "null"
     }
-
+    @Serializable
     object Undefined : KnomadValue() {
         override fun toString(): kotlin.String = "undefined"
     }
 }
 
-fun TonItem.toKnomadValue(
-    context: Context
-): KnomadValue {
+fun Any.toKnomadValue(): KnomadValue {
     return when (this) {
-        is TonObject -> {
-            Map(this.fields
-                .mapValues { (_, value) -> value.toKnomadValue(context) }
-                .mapKeys { (key, _) -> String(key) }
-            )
-        }
-
-        is TonArray -> {
-            List(this.items.map {
-                it.toKnomadValue(context)
-            })
-        }
-
-        is TonString -> {
-            String(this.value.parse(context))
-        }
-
-        is TonBoolean -> Boolean(this.value)
-        is TonNull -> Null
-        is TonNumber -> when (this.value) {
-            is Int, Long -> Integer(this.value as? Long ?: return Null)
-            is Float, Double -> Float(this.value as? Double ?: return Null)
-            else -> Null
-        }
+        is String -> KnomadValue.String(this)
+        is Boolean -> KnomadValue.Boolean(this)
+        is Number -> KnomadValue.Number(this)
+        is Array<*> -> KnomadValue.List(this.map { it?.toKnomadValue() ?: KnomadValue.Null })
+        is List<*> -> KnomadValue.List(this.map { it?.toKnomadValue() ?: KnomadValue.Null })
+        else -> KnomadValue.Null
     }
 }
 
-fun KnomadType.new(value: Any?): KnomadValue {
-    if (value == null) return Undefined
-    return when (this) {
-        is KnomadType.Int -> Integer(value as? Long ?: return Null)
-        is KnomadType.String -> String(value as? String ?: return Null)
-        is KnomadType.Bool -> Boolean(value as? Boolean ?: return Null)
-        is KnomadType.Float -> Float(value as? Double ?: return Null)
-        is KnomadType.List -> List((value as? List<*>)?.map {
-            when (it) {
-                is KnomadType -> it.new(it)
-                else -> Other(it.toString())
-            }
-        } ?: return Null)
+fun knomadListOf(vararg values: KnomadValue): KnomadValue.List = KnomadValue.List(values.toList())
 
-        is KnomadType.Map -> {
-            Map((value as? Map<*, *>)?.mapKeys { (key, _) ->
-                when (key) {
-                    is KnomadType -> key.new(key)
-                    else -> Other(key.toString())
-                }
-            }?.mapValues { (_, value) ->
-                when (value) {
-                    is KnomadType -> value.new(value)
-                    else -> Other(value.toString())
-                }
-            }
-                ?: return Null)
-        }
-
-        is KnomadType.Custom -> {
-            Other(value.toString())
-        }
-    }
-}
+@JvmName("knomadListOfKnomadValue")
+fun knomadMapOf(vararg pairs: Pair<KnomadValue, KnomadValue>): KnomadValue.Map = KnomadValue.Map(pairs.toMap())
+@JvmName("knomadListOfStringValue")
+fun knomadMapOf(vararg pairs: Pair<String, KnomadValue>): KnomadValue.Map = KnomadValue.Map(pairs.toMap().mapKeys { KnomadValue.String(it.key) })
+@JvmName("knomadListOfString")
+fun knomadMapOf(vararg pairs: Pair<String, String>): KnomadValue.Map = KnomadValue.Map(pairs.toMap()
+    .mapKeys { KnomadValue.String(it.key) }
+    .mapValues { KnomadValue.String(it.value) }
+)

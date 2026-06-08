@@ -1,4 +1,4 @@
-package top.song_mojing.knomad.model.serialize.serializer_ton
+package top.song_mojing.knomad.model.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -18,6 +18,6 @@ object TonObjectSerializer : KSerializer<TonObject> {
     }
 
     override fun serialize(encoder: Encoder, value: TonObject) {
-        encoder.encodeSerializableValue(mapSerializer, value.fields)
+        encoder.encodeSerializableValue(mapSerializer, value)
     }
 }
