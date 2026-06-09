@@ -31,7 +31,7 @@ Knomad 通过“配置即代码”的理念，让你只需编写一份符合规�
 ### 0. 引入依赖
 
 ```kotlin
-implementation("top.song-mojing:knomad:0.1.0")
+implementation("top.song-mojing:knomad:1.0.0")
 ```
 
 ### 1. 编写配置文件 (test.yaml)
@@ -40,85 +40,48 @@ implementation("top.song-mojing:knomad:0.1.0")
 
 ```yaml
 # yaml-language-server: $schema=schema.yaml
-
+version: 'v1.0.0'
 variables:
-  ApiKey:
-    type: "String"
-    required: true
-    description: "供应商的 API 密钥"
   Model:
-    type: "String"
+    type: String
     required: true
-    description: "需要调用的模型"
+    description: 需要调用的模型
   Content:
-    type: "List:Dialogue"
+    type: List
     required: true
-    description: "对话列表"
-
-types:
-  Dialogue:
-    description: "对话内容"
-    struct:
-      role:
-        type: "String"
-      content:
-        type: "String"
-
-baseUrl: "https://api.openai.com/v1"
-
+    description: 对话列表
+baseUrl: 'https://api.openai.com/v1'
 endpoints:
   completions:
-    path: "/chat/completions"
-    request:
-      method: "POST"
-      headers:
-        Authorization: "Bearer ${{variables.ApiKey}}"
-        Content-Type: "application/json"
-        Accept: "application/json"
-      body:
-        model: "${{variables.Model}}"
-        messages: "{{variables.Content}}"
-    response:
-      - httpCode: "type:success"
-        type: "appliction/json"
-        values:
-          - name: "content"
-            type: "Dialogue"
-            path: '$.choices[0].message.content'
-      - httpCode: "code:403"
-        type: "appliction/json"
-        values:
-          - name: "errMsg"
-            type: "String"
-            path: '$.error.message'
-  streamingCompletions:
-    path: "/chat/completions"
-    request:
-      method: "POST"
-      headers:
-        Authorization: "Bearer ${{variables.ApiKey}}"
-        Content-Type: "application/json"
-        Accept: "text/event-stream"
-      body:
-        model: "${{variables.Model}}"
-        messages: "{{variables.Content}}"
-        stream: true
-    response:
-      - httpCode: "type:success"
-        type: "text/event-stream"
-        values:
-          - name: "content"
-            type: "Dialogue"
-            path: '$.choices[0].message.content'
-      - httpCode: "code:403"
-        type: "appliction/json"
-        values:
-          - name: "errMsg"
-            type: "String"
-            path: '$.error.message'
+    path: '/chat/completions'
+    methods:
+      POST:
+        request:
+          headers:
+            Authorization: "Bearer ${{env.ApiKey}}"
+            'Content-Type': 'application/json'
+            Accept: 'application/json'
+          body:
+            model: "${{variables.Model}}"
+            messages: "{{variables.Content}}"
+        response:
+          - httpCode: 'type:success'
+            type: 'appliction/json'
+            values:
+              - name: content
+                type: Map
+                path: '$.choices[0].message.content'
+          - httpCode: 'code:403'
+            type: 'appliction/json'
+            values:
+              - name: errMsg
+                type: String
+                path: '$.error.message'
 ```
 
 ### 2. 在代码中解析
+
+参考：[测试](./src/test/kotlin/Main.kt)
 
 ```kotlin
 val file = File("./path/to/test.yaml")
