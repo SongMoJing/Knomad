@@ -3,6 +3,7 @@ package top.song_mojing.knomad.model
 import kotlinx.serialization.Serializable
 import top.song_mojing.knomad.model.serializer.KnomadTypeSerializer
 import top.song_mojing.knomad.model.serializer.MimeTypeSerializer
+import top.song_mojing.knomad.model.serializer.StringTemplateSerializer
 import top.song_mojing.knomad.model.serializer.TemplateSerializer
 
 @Serializable(with = KnomadTypeSerializer::class)
@@ -20,22 +21,31 @@ sealed class KnomadType {
 }
 
 @Serializable(with = TemplateSerializer::class)
-sealed class Template {
-    @Serializable
-    class StringTemplate(val value: List<ValueItem>) : Template() {
-        @Serializable
-        sealed class ValueItem {
-            class StringValue(val value: String) : ValueItem()
-            class Placeholder(val key: String, val value: String) : ValueItem()
+sealed class Template
+
+@Serializable(with = StringTemplateSerializer::class)
+class StringTemplate(val value: List<ValueItem>) : Template() {
+    fun unwrap(): String {
+        return value.joinToString("") {
+            when (it) {
+                is StringValue -> it.value
+                is Placeholder -> $$"${{$${it.key}.$${it.value}}}"
+            }
         }
     }
-
-    @Serializable
-    class Struct(
-        val key: String,
-        val value: String
-    ) : Template()
 }
+
+@Serializable
+sealed class ValueItem
+
+class StringValue(val value: String) : ValueItem()
+class Placeholder(val key: String, val value: String) : ValueItem()
+
+@Serializable
+class Struct(
+    val key: String,
+    val value: String
+) : Template()
 
 @Suppress("unused")
 @Serializable

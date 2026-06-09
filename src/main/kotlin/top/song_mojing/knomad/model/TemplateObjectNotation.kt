@@ -30,10 +30,10 @@ class TonArray(private val items: List<TonItem>) : TonItem(), List<TonItem> by i
 sealed class TonValue : TonItem()
 
 @Serializable
-class TonString(var value: Template.StringTemplate) : TonValue()
+class TonString(var value: StringTemplate) : TonValue()
 
 @Serializable
-class TonTemplate(var value: Template.Struct) : TonValue()
+class TonTemplate(var value: Struct) : TonValue()
 
 @Serializable
 class TonNumber(var value: NumberWrapper) : TonValue()
@@ -59,9 +59,9 @@ fun tonObjectOf(vararg fields: Pair<String, String>): TonObject = TonObject(
 @JvmName("tonStringOfString")
 fun String.toTonString(): TonString {
     return TonString(
-        Template.StringTemplate(
+        StringTemplate(
             listOf(
-                Template.StringTemplate.ValueItem.StringValue(
+                StringValue(
                     this
                 )
             )

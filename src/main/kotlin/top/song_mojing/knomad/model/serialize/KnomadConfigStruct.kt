@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import top.song_mojing.knomad.model.KnomadType
 import top.song_mojing.knomad.model.HttpMethod
 import top.song_mojing.knomad.model.MimeType
+import top.song_mojing.knomad.model.StringTemplate
 import top.song_mojing.knomad.model.Template
 import top.song_mojing.knomad.model.TonObject
 import top.song_mojing.knomad.model.serializer.TonObjectSerializer
@@ -37,8 +38,8 @@ data class EndpointOperationStruct(
 
 @Serializable
 data class RequestConfigStruct(
-    val query: Map<String, Template>? = null,
-    val headers: Map<String, Template>? = null,
+    val query: Map<String, StringTemplate>? = null,
+    val headers: Map<String, StringTemplate>? = null,
     @Serializable(with = TonObjectSerializer::class)
     val body: TonObject? = null
 )

@@ -6,12 +6,9 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import top.song_mojing.knomad.model.HttpMethod.*
-import top.song_mojing.knomad.model.TonItem
+import top.song_mojing.knomad.model.TonBoolean
 import top.song_mojing.knomad.model.TonNumber
-import top.song_mojing.knomad.model.TonString
-import top.song_mojing.knomad.model.knomadListOf
-import top.song_mojing.knomad.model.knomadMapOf
-import top.song_mojing.knomad.model.toKnomadValue
+import top.song_mojing.knomad.model.serializer.NumberWrapper
 import top.song_mojing.knomad.model.toTonString
 import top.song_mojing.knomad.model.tonArrayOf
 import top.song_mojing.knomad.model.tonObjectOf
@@ -26,19 +23,19 @@ class MainTest {
         val config = loadConfig("httpbin-test.yaml")
         val context = Context(
             variableMapper = mapOf(
-                "Model" to "Qwen2.5-7B-Instruct".toKnomadValue(),
-                "Content" to knomadListOf(
-                    knomadMapOf(
+                "Model" to "Qwen2.5-7B-Instruct".toTonString(),
+                "Content" to tonArrayOf(
+                    tonObjectOf(
                         "role" to "system",
                         "content" to "你是一个有用的助手"
                     ),
-                    knomadMapOf(
+                    tonObjectOf(
                         "role" to "user",
                         "content" to "这是一个测试，请回复：你好"
                     )
                 ),
-                "Count" to 1.toKnomadValue(),
-                "TRUE" to true.toKnomadValue(),
+                "Count" to TonNumber(NumberWrapper(1)),
+                "TRUE" to TonBoolean(true),
             ),
             variables = config.variables
         )
@@ -46,10 +43,11 @@ class MainTest {
             endpoint.methods.forEach { (method, struct) ->
                 val block: HttpRequestBuilder.() -> Unit = {
                     struct.request.headers?.forEach { (key, value) ->
-                        header(key, value.parse(context))
+                        header(key, value.unwrap())
                     }
                     struct.request.body?.parse(context)?.let { body ->
                         println("实际对象类型: ${body::class.qualifiedName}")
+                        println("实际对象类型: ${Json.encodeToString(body)}")
                         setBody(
                             Json.encodeToString(body)
                         )
@@ -65,7 +63,7 @@ class MainTest {
                     }
                     ?.let { builder ->
                         struct.request.query?.forEach { (key, value) ->
-                            builder.addQueryParameter(key, value.parse(context))
+                            builder.addQueryParameter(key, Json.encodeToString(value.unwrap()))
                         }
                         return@let builder
                     }

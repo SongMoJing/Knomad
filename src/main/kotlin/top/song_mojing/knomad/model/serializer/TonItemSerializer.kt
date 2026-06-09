@@ -49,16 +49,16 @@ object TonItemSerializer : KSerializer<TonItem> {
                 val content = element.content ?: ""
                 if (content.contains("{{")) {
                     when (val value = TemplateSerializer.parseTemplateString(content)) {
-                        is Template.StringTemplate -> TonString(value)
-                        is Template.Struct -> TonTemplate(value)
+                        is StringTemplate -> TonString(value)
+                        is Struct -> TonTemplate(value)
                     }
                 } else {
                     content.toBooleanStrictOrNull()?.let { TonBoolean(it) }
                         ?: content.toLongOrNull()?.let { TonNumber(NumberWrapper(it)) }
                         ?: content.toDoubleOrNull()?.let { TonNumber(NumberWrapper(it)) }
                         ?: when (val value = TemplateSerializer.parseTemplateString(content)) {
-                            is Template.StringTemplate -> TonString(value)
-                            is Template.Struct -> TonTemplate(value)
+                            is StringTemplate -> TonString(value)
+                            is Struct -> TonTemplate(value)
                         }
                 }
             }

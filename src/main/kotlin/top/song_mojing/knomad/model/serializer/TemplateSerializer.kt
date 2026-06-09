@@ -6,7 +6,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import top.song_mojing.knomad.model.Template
+import top.song_mojing.knomad.model.*
 import kotlin.text.get
 
 object TemplateSerializer : KSerializer<Template> {
@@ -23,41 +23,41 @@ object TemplateSerializer : KSerializer<Template> {
     fun parseTemplateString(input: String): Template {
         val structMatch = STRICT_PLACEHOLDER.find(input)
         if (structMatch != null) {
-            return Template.Struct(
+            return Struct(
                 key = structMatch.groups["key"]!!.value,
                 value = structMatch.groups["value"]!!.value
             )
         }
-        val items = mutableListOf<Template.StringTemplate.ValueItem>()
+        val items = mutableListOf<ValueItem>()
         var lastIndex = 0
         CONTAIN_PLACEHOLDER.findAll(input).forEach { match ->
             if (match.range.first > lastIndex) {
-                items.add(Template.StringTemplate.ValueItem.StringValue(input.substring(lastIndex, match.range.first)))
+                items.add(StringValue(input.substring(lastIndex, match.range.first)))
             }
             items.add(
-                Template.StringTemplate.ValueItem.Placeholder(
+                Placeholder(
                 key = match.groups["key"]!!.value,
                 value = match.groups["value"]!!.value
             ))
             lastIndex = match.range.last + 1
         }
         if (lastIndex < input.length) {
-            items.add(Template.StringTemplate.ValueItem.StringValue(input.substring(lastIndex)))
+            items.add(StringValue(input.substring(lastIndex)))
         }
-        return Template.StringTemplate(items)
+        return StringTemplate(items)
     }
 
     override fun serialize(encoder: Encoder, value: Template) {
         val str = when (value) {
-            is Template.Struct -> "{{${
+            is Struct -> "{{${
                 if (!value.key.startsWith("knomad@")) "knomad@"
                 else ""
             }${value.value}}}"
-            is Template.StringTemplate -> {
+            is StringTemplate -> {
                 value.value.joinToString("") { item ->
                     when (item) {
-                        is Template.StringTemplate.ValueItem.StringValue -> item.value
-                        is Template.StringTemplate.ValueItem.Placeholder -> $$"${{$${
+                        is StringValue -> item.value
+                        is Placeholder -> $$"${{$${
                                 if (!item.key.startsWith("knomad@")) "knomad@"
                                 else ""
                         }$${item.key}.$${item.value}}}"
