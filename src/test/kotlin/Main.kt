@@ -1,6 +1,9 @@
 import io.ktor.client.*
+import io.ktor.client.plugins.websocket.WebSockets
+import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
+import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -19,8 +22,20 @@ import kotlin.test.Test
 class MainTest {
     @Test
     fun test(): Unit = runBlocking {
-        val client = HttpClient()
-        val config = loadConfig("httpbin-test.yaml")
+        val client = HttpClient {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        prettyPrint = true
+                        ignoreUnknownKeys = true
+                    }
+                )
+            }
+            install(WebSockets) {
+                pingIntervalMillis = 20_000
+            }
+        }
+        val config = loadConfig("OpenAI.yaml")
         val context = Context(
             variableMapper = mapOf(
                 "Model" to "Qwen2.5-7B-Instruct".toTonString(),
@@ -43,6 +58,7 @@ class MainTest {
             endpoint.methods.forEach { (method, struct) ->
                 val block: HttpRequestBuilder.() -> Unit = {
                     struct.request.headers?.forEach { (key, value) ->
+                        println("请求头: $key: ${value.value}")
                         header(key, value.unwrap())
                     }
                     struct.request.body?.parse(context)?.let { body ->

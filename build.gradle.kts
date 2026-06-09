@@ -29,6 +29,8 @@ dependencies {
     testImplementation("io.ktor:ktor-client-core:3.0.1")
     testImplementation("io.ktor:ktor-client-okhttp:3.0.1")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.0.1")
+    testImplementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
+    testImplementation("io.ktor:ktor-client-contentnegotiation:3.0.1")
     // JsonPath
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
     // Json 解析
