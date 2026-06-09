@@ -24,7 +24,7 @@ endpoints:
             Accept: 'application/json'
         response:
           - httpCode: 'type:success'
-            type: 'appliction/json'
+            type: 'application/json'
             values:
               - name: Query1
                 type: String

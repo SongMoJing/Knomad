@@ -66,13 +66,13 @@ endpoints:
             messages: "{{variables.Content}}"
         response:
           - httpCode: 'type:success'
-            type: 'appliction/json'
+            type: 'application/json'
             values:
               - name: content
                 type: Map
                 path: '$.choices[0].message.content'
           - httpCode: 'code:403'
-            type: 'appliction/json'
+            type: 'application/json'
             values:
               - name: errMsg
                 type: String
