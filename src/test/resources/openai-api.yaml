@@ -13,52 +13,50 @@ baseUrl: 'https://api.openai.com/v1'
 endpoints:
   completions:
     path: '/chat/completions'
-    methods:
-      POST:
-        request:
-          headers:
-            Authorization: "Bearer ${{env.ApiKey}}"
-            'Content-Type': 'application/json'
-            Accept: 'application/json'
-          body:
-            model: "${{variables.Model}}"
-            messages: "{{variables.Content}}"
-        response:
-          - httpCode: 'type:success'
-            type: 'application/json'
-            values:
-              - name: content
-                type: Map
-                path: '$.choices[0].message.content'
-          - httpCode: 'code:403'
-            type: 'application/json'
-            values:
-              - name: errMsg
-                type: String
-                path: '$.error.message'
+    method: POST
+    request:
+      headers:
+        Authorization: "Bearer ${{env.ApiKey}}"
+        'Content-Type': 'application/json'
+        Accept: 'application/json'
+      body:
+        model: "${{variables.Model}}"
+        messages: "{{variables.Content}}"
+    response:
+      - httpCode: 'type:success'
+        type: 'application/json'
+        values:
+          - name: content
+            type: Map
+            path: '$.choices[0].message.content'
+      - httpCode: 'code:403'
+        type: 'application/json'
+        values:
+          - name: errMsg
+            type: String
+            path: '$.error.message'
   streamingCompletions:
     path: '/chat/completions'
-    methods:
-      POST:
-        request:
-          headers:
-            Authorization: "Bearer ${{env.ApiKey}}"
-            'Content-Type': 'application/json'
-            Accept: 'text/event-stream'
-          body:
-            model: "${{variables.Model}}"
-            messages: "{{variables.Content}}"
-            stream: true
-        response:
-          - httpCode: 'type:success'
-            type: 'text/event-stream'
-            values:
-              - name: content
-                type: Map
-                path: '$.choices[0].message.content'
-          - httpCode: 'code:403'
-            type: 'application/json'
-            values:
-              - name: errMsg
-                type: String
-                path: '$.error.message'
+    method: POST
+    request:
+      headers:
+        Authorization: "Bearer ${{env.ApiKey}}"
+        'Content-Type': 'application/json'
+        Accept: 'text/event-stream'
+      body:
+        model: "${{variables.Model}}"
+        messages: "{{variables.Content}}"
+        stream: true
+    response:
+      - httpCode: 'type:success'
+        type: 'text/event-stream'
+        values:
+          - name: content
+            type: Map
+            path: '$.choices[0].message.content'
+      - httpCode: 'code:403'
+        type: 'application/json'
+        values:
+          - name: errMsg
+            type: String
+            path: '$.error.message'

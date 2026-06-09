@@ -40,8 +40,14 @@ implementation("top.song-mojing:knomad:2.0.0")
 
 ```yaml
 # yaml-language-server: $schema=schema.yaml
+
 version: 'v1.0.0'
+
 variables:
+  ApiKey:
+    type: String
+    required: true
+    description: API Key
   Model:
     type: String
     required: true
@@ -50,51 +56,39 @@ variables:
     type: List
     required: true
     description: 对话列表
+
 baseUrl: 'https://api.openai.com/v1'
+
 endpoints:
   completions:
     path: '/chat/completions'
-    methods:
-      POST:
-        request:
-          headers:
-            Authorization: "Bearer ${{env.ApiKey}}"
-            'Content-Type': 'application/json'
-            Accept: 'application/json'
-          body:
-            model: "${{variables.Model}}"
-            messages: "{{variables.Content}}"
-        response:
-          - httpCode: 'type:success'
-            type: 'application/json'
-            values:
-              - name: content
-                type: Map
-                path: '$.choices[0].message.content'
-          - httpCode: 'code:403'
-            type: 'application/json'
-            values:
-              - name: errMsg
-                type: String
-                path: '$.error.message'
+    method: POST
+    request:
+      headers:
+        Authorization: 'Bearer ${{variables.ApiKey}}'
+        'Content-Type': 'application/json'
+        Accept: 'application/json'
+      body:
+        model: '${{variables.Model}}'
+        messages: '{{variables.Content}}'
+    response:
+      - httpCode: 'type:success'
+        type: 'application/json'
+        values:
+          - name: content
+            type: Map
+            path: '$.choices[0].message.content'
+      - httpCode: 'code:403'
+        type: 'application/json'
+        values:
+          - name: errMsg
+            type: String
+            path: '$.error.message'
 ```
 
 ### 2. 在代码中解析
 
 参考：[测试](./src/test/kotlin/Main.kt)
-
-```kotlin
-val file = File("./path/to/test.yaml")
-try {
-    val config = YamlParser.parser(file)
-    val encode = Yaml.encodeToString(KnomadConfig.serializer(), config)
-    println(encode)
-} catch (error: YamlParserException) {
-    error.validatorExceptions.forEach {
-        println(it)
-    }
-}
-```
 
 ## 贡献与开源
 

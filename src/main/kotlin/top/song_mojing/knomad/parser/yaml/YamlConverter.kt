@@ -28,17 +28,9 @@ object YamlConverter {
 
     private fun toEndpointStruct(raw: Any?): EndpointStruct {
         val map = raw as? Map<*, *> ?: throw YamlConverterException("Endpoint 必须是 Map")
-        val rawMethods = map["methods"] as? Map<*, *>
-            ?: throw YamlConverterException("Endpoint.methods 必须是 Map")
-        val methods = rawMethods.entries.associate { (k, v) ->
-            toHttpMethod(k.toString()) to toEndpointOperationStruct(v)
-        }
-        return EndpointStruct(path = map.string("path"), methods = methods)
-    }
-
-    private fun toEndpointOperationStruct(raw: Any?): EndpointOperationStruct {
-        val map = raw as? Map<*, *> ?: throw YamlConverterException("EndpointOperation 必须是 Map")
-        return EndpointOperationStruct(
+        return EndpointStruct(
+            path = map.string("path"),
+            method = toHttpMethod(map.string("method")),
             request = toRequestConfigStruct(map["request"]),
             response = map.listValue("response") { toResponseConfigStruct(it) }
         )

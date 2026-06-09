@@ -28,11 +28,7 @@ data class VariableStruct(
 @Serializable
 data class EndpointStruct(
     val path: String,
-    val methods: Map<HttpMethod, EndpointOperationStruct>
-)
-
-@Serializable
-data class EndpointOperationStruct(
+    val method: HttpMethod,
     val request: RequestConfigStruct,
     val response: List<ResponseConfigStruct> = emptyList()
 )
