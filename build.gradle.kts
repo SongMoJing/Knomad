@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "top.song-mojing"
-version = "1.0.0-LOCAL.11"
+version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -17,7 +17,7 @@ repositories {
 dependencies {
     // 日志
     implementation("org.slf4j:slf4j-nop:2.0.16")
-    // YAML 解析 (SnakeYAML: 纯Java，Android/PC 均稳定)
+    // YAML 解析
     implementation("org.yaml:snakeyaml:2.3")
     // JSON Schema
     implementation("com.networknt:json-schema-validator:1.0.87")
