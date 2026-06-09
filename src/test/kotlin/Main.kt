@@ -1,3 +1,4 @@
+import com.jayway.jsonpath.JsonPath
 import io.ktor.client.*
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.contentnegotiation.*
@@ -9,14 +10,17 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import top.song_mojing.knomad.model.HttpMethod.*
+import top.song_mojing.knomad.model.HttpStatus
 import top.song_mojing.knomad.model.TonBoolean
 import top.song_mojing.knomad.model.TonNumber
 import top.song_mojing.knomad.model.serializer.NumberWrapper
 import top.song_mojing.knomad.model.toTonString
 import top.song_mojing.knomad.model.tonArrayOf
 import top.song_mojing.knomad.model.tonObjectOf
-import top.song_mojing.knomad.validator.Context
-import top.song_mojing.knomad.validator.parse
+import top.song_mojing.knomad.Context
+import top.song_mojing.knomad.Variable
+import top.song_mojing.knomad.parse
+import top.song_mojing.knomad.toTonItem
 import kotlin.test.Test
 
 class MainTest {
@@ -35,6 +39,7 @@ class MainTest {
                 pingIntervalMillis = 20_000
             }
         }
+        println("API KEY: ${System.getenv("ApiKey")}")
         val config = loadConfig("OpenAI.yaml")
         val context = Context(
             variableMapper = mapOf(
@@ -58,8 +63,8 @@ class MainTest {
             endpoint.methods.forEach { (method, struct) ->
                 val block: HttpRequestBuilder.() -> Unit = {
                     struct.request.headers?.forEach { (key, value) ->
-                        println("请求头: $key: ${value.value}")
-                        header(key, value.unwrap())
+                        println("请求头: $key: ${value.parse(context)}")
+                        header(key, value.parse(context))
                     }
                     struct.request.body?.parse(context)?.let { body ->
                         println("请求体: ${Json.encodeToString(body)}")
@@ -78,7 +83,7 @@ class MainTest {
                     }
                     ?.let { builder ->
                         struct.request.query?.forEach { (key, value) ->
-                            builder.addQueryParameter(key, Json.encodeToString(value.unwrap()))
+                            builder.addQueryParameter(key, Json.encodeToString(value.parse(context)))
                         }
                         return@let builder
                     }
@@ -96,8 +101,50 @@ class MainTest {
                             else -> return@forEach
                         }
                         println("++++++++++++++++[${method}] $endpointName ================================")
-                        println("URL: $url")
-                        println(res.bodyAsText())
+                        println(" [URL] $url")
+                        val responseBody = res.bodyAsText()
+                        println(" [Response] $responseBody")
+                        if (res.status.value in 200..299) {
+                            val successResponseConfig = struct.response.find {
+                                when (it.httpCode) {
+                                    is HttpStatus.Status ->
+                                        it.httpCode == HttpStatus.Status.Success
+                                    is HttpStatus.Code ->
+                                        it.httpCode.code == res.status.value
+                                }
+                            }
+                            successResponseConfig?.values?.forEach { valueConfig ->
+                                try {
+                                    val extractedObject: Any? = JsonPath.read(responseBody, valueConfig.path)
+                                    val tonItem = extractedObject.toTonItem()
+                                    context.variables[valueConfig.name] = Variable(
+                                        value = tonItem,
+                                        required = false,
+                                        description = "Extracted from JSON Path [${valueConfig.path}]"
+                                    )
+                                    println(" [JSON Path] 变量 '${valueConfig.name}' 已存入上下文, 值为: $extractedObject")
+                                } catch (e: Exception) {
+                                    println(" [JSON Path] 解析路径 '${valueConfig.path}' 出错: ${e.message}")
+                                }
+                            }
+                        } else {
+                            val errorResponseConfig = struct.response.find {
+                                when (it.httpCode) {
+                                    is HttpStatus.Status ->
+                                        it.httpCode == HttpStatus.Status.Failure
+                                    is HttpStatus.Code ->
+                                        it.httpCode.code == res.status.value
+                                }
+                            }
+                            errorResponseConfig?.values?.forEach { valueConfig ->
+                                try {
+                                    val extractedObject: Any? = JsonPath.read(responseBody, valueConfig.path)
+                                    println(" [异常状态码提取] '${valueConfig.name}': $extractedObject")
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
                     }
             }
         }

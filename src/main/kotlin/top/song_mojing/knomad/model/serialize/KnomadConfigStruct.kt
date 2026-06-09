@@ -3,6 +3,7 @@ package top.song_mojing.knomad.model.serialize
 import kotlinx.serialization.Serializable
 import top.song_mojing.knomad.model.KnomadType
 import top.song_mojing.knomad.model.HttpMethod
+import top.song_mojing.knomad.model.HttpStatus
 import top.song_mojing.knomad.model.MimeType
 import top.song_mojing.knomad.model.StringTemplate
 import top.song_mojing.knomad.model.Template
@@ -45,7 +46,7 @@ data class RequestConfigStruct(
 
 @Serializable
 data class ResponseConfigStruct(
-    val httpCode: String,
+    val httpCode: HttpStatus,
     val type: MimeType,
     val values: List<ResponseValueStruct> = emptyList()
 )

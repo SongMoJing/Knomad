@@ -1,6 +1,7 @@
 package top.song_mojing.knomad.model
 
 import kotlinx.serialization.Serializable
+import top.song_mojing.knomad.model.serializer.HttpStatusSerializer
 import top.song_mojing.knomad.model.serializer.KnomadTypeSerializer
 import top.song_mojing.knomad.model.serializer.MimeTypeSerializer
 import top.song_mojing.knomad.model.serializer.StringTemplateSerializer
@@ -28,15 +29,6 @@ class StringTemplate(val value: List<ValueItem>) : Template() {
 
     companion object {
         fun of(text: String): StringTemplate = StringTemplate(listOf(StringValue(text)))
-    }
-
-    fun unwrap(): String {
-        return value.joinToString("") {
-            when (it) {
-                is StringValue -> it.value
-                is Placeholder -> $$"${{$${it.key}.$${it.value}}}"
-            }
-        }
     }
 }
 
@@ -67,6 +59,16 @@ enum class HttpMethod {
     OPTIONS,
     TRACE,
     CONNECT,
+}
+
+@Serializable(with = HttpStatusSerializer::class)
+sealed class HttpStatus {
+    sealed class Status: HttpStatus() {
+        object Success : Status()
+        object Failure : Status()
+    }
+
+    class Code(val code: Int) : HttpStatus()
 }
 
 @Serializable(with = MimeTypeSerializer::class)
