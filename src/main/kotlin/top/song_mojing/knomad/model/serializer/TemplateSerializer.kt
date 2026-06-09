@@ -52,7 +52,7 @@ object TemplateSerializer : KSerializer<Template> {
             is Struct -> "{{${
                 if (!value.key.startsWith("knomad@")) "knomad@"
                 else ""
-            }${value.value}}}"
+            }${value.key}.${value.value}}}"
             is StringTemplate -> {
                 value.value.joinToString("") { item ->
                     when (item) {

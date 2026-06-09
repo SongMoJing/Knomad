@@ -40,7 +40,6 @@ data class EndpointOperationStruct(
 data class RequestConfigStruct(
     val query: Map<String, StringTemplate>? = null,
     val headers: Map<String, StringTemplate>? = null,
-    @Serializable(with = TonObjectSerializer::class)
     val body: TonObject? = null
 )
 

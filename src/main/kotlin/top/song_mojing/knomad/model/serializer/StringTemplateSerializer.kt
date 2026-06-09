@@ -10,11 +10,11 @@ import kotlinx.serialization.encoding.Encoder
 import top.song_mojing.knomad.model.StringTemplate
 
 object StringTemplateSerializer : KSerializer<StringTemplate> {
+
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("StringTemplate", PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder): StringTemplate {
         val input = decoder.decodeString()
-        // 复用你已经写好的 TemplateSerializer 的解析逻辑
         val template = TemplateSerializer.parseTemplateString(input)
         if (template is StringTemplate) {
             return template
@@ -23,7 +23,6 @@ object StringTemplateSerializer : KSerializer<StringTemplate> {
     }
 
     override fun serialize(encoder: Encoder, value: StringTemplate) {
-        // 复用已有的序列化逻辑
         TemplateSerializer.serialize(encoder, value)
     }
 }

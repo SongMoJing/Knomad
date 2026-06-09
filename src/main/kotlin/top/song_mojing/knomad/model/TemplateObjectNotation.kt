@@ -58,13 +58,5 @@ fun tonObjectOf(vararg fields: Pair<String, String>): TonObject = TonObject(
 
 @JvmName("tonStringOfString")
 fun String.toTonString(): TonString {
-    return TonString(
-        StringTemplate(
-            listOf(
-                StringValue(
-                    this
-                )
-            )
-        )
-    )
+    return TonString(this.toTemplate)
 }

@@ -25,6 +25,11 @@ sealed class Template
 
 @Serializable(with = StringTemplateSerializer::class)
 class StringTemplate(val value: List<ValueItem>) : Template() {
+
+    companion object {
+        fun of(text: String): StringTemplate = StringTemplate(listOf(StringValue(text)))
+    }
+
     fun unwrap(): String {
         return value.joinToString("") {
             when (it) {
@@ -34,6 +39,9 @@ class StringTemplate(val value: List<ValueItem>) : Template() {
         }
     }
 }
+
+val String.toTemplate: StringTemplate
+    get() = StringTemplate(listOf(StringValue(this)))
 
 @Serializable
 sealed class ValueItem

@@ -46,8 +46,7 @@ class MainTest {
                         header(key, value.unwrap())
                     }
                     struct.request.body?.parse(context)?.let { body ->
-                        println("实际对象类型: ${body::class.qualifiedName}")
-                        println("实际对象类型: ${Json.encodeToString(body)}")
+                        println("请求体: ${Json.encodeToString(body)}")
                         setBody(
                             Json.encodeToString(body)
                         )
