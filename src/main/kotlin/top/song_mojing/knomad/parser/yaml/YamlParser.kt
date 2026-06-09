@@ -1,11 +1,14 @@
 package top.song_mojing.knomad.parser.yaml
 
-import net.mamoe.yamlkt.Yaml
+import org.yaml.snakeyaml.Yaml
 import top.song_mojing.knomad.model.serialize.KnomadConfigStruct
 import java.io.File
 
 @Suppress("unused")
 object YamlParser {
+
+    private val yaml = Yaml()
+
     fun parser(
         yamlFile: File,
         schemaFile: File
@@ -39,7 +42,8 @@ object YamlParser {
         if (exceptions.isNotEmpty()) {
             throw YamlParserException(exceptions)
         }
-        return Yaml.decodeFromString(KnomadConfigStruct.serializer(), yamlContent)
+        val raw: Any? = yaml.load<Any>(yamlContent)
+        return YamlConverter.toKnomadConfig(raw)
     }
 }
 

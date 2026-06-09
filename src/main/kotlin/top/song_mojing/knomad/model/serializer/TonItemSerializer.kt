@@ -2,11 +2,12 @@ package top.song_mojing.knomad.model.serializer
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import net.mamoe.yamlkt.*
+import kotlinx.serialization.json.*
 import top.song_mojing.knomad.model.*
 
 object TonItemSerializer : KSerializer<TonItem> {
@@ -27,39 +28,53 @@ object TonItemSerializer : KSerializer<TonItem> {
     }
 
     override fun deserialize(decoder: Decoder): TonItem {
-        val element = decoder.decodeSerializableValue(YamlElement.serializer())
-        return convertToTonItem(element)
+        val jsonDecoder = decoder as? JsonDecoder
+            ?: throw SerializationException("TonItemSerializer 仅支持 JSON 反序列化，当前 decoder: ${decoder::class.simpleName}")
+        val element: JsonElement = jsonDecoder.decodeJsonElement()
+        return convertJsonToTonItem(element)
     }
 
-    private fun convertToTonItem(element: YamlElement): TonItem {
+    internal fun convertJsonToTonItem(element: JsonElement): TonItem {
         return when (element) {
-            is YamlMap -> {
+            is JsonNull -> TonNull()
+            is JsonObject -> {
                 val map = mutableMapOf<String, TonItem>()
                 for ((k, v) in element) {
-                    val keyStr = (k as? YamlPrimitive)?.content ?: k.toString()
-                    map[keyStr] = convertToTonItem(v)
+                    map[k] = convertJsonToTonItem(v)
                 }
                 TonObject(map)
             }
-            is YamlList -> {
-                TonArray(element.map { convertToTonItem(it) })
-            }
-            is YamlNull -> TonNull()
-            is YamlPrimitive -> {
-                val content = element.content ?: ""
-                if (content.contains("{{")) {
-                    when (val value = TemplateSerializer.parseTemplateString(content)) {
-                        is StringTemplate -> TonString(value)
-                        is Struct -> TonTemplate(value)
-                    }
-                } else {
-                    content.toBooleanStrictOrNull()?.let { TonBoolean(it) }
-                        ?: content.toLongOrNull()?.let { TonNumber(NumberWrapper(it)) }
-                        ?: content.toDoubleOrNull()?.let { TonNumber(NumberWrapper(it)) }
-                        ?: when (val value = TemplateSerializer.parseTemplateString(content)) {
+            is JsonPrimitive -> {
+                if (element.isString) {
+                    val content = element.content
+                    if (content.contains("{{")) {
+                        when (val value = TemplateSerializer.parseTemplateString(content)) {
                             is StringTemplate -> TonString(value)
                             is Struct -> TonTemplate(value)
                         }
+                    } else {
+                        content.toBooleanStrictOrNull()?.let { TonBoolean(it) }
+                            ?: content.toLongOrNull()?.let { TonNumber(NumberWrapper(it)) }
+                            ?: content.toDoubleOrNull()?.let { TonNumber(NumberWrapper(it)) }
+                            ?: when (val value = TemplateSerializer.parseTemplateString(content)) {
+                                is StringTemplate -> TonString(value)
+                                is Struct -> TonTemplate(value)
+                            }
+                    }
+                } else {
+                    val content = element.content
+                    content.toBooleanStrictOrNull()?.let { return TonBoolean(it) }
+                    content.toLongOrNull()?.let { return TonNumber(NumberWrapper(it)) }
+                    content.toDoubleOrNull()?.let { return TonNumber(NumberWrapper(it)) }
+                    TonString(StringTemplate.of(content))
+                }
+            }
+            else -> {
+                try {
+                    val arr = element.jsonArray
+                    TonArray(arr.map { convertJsonToTonItem(it) })
+                } catch (_: Exception) {
+                    TonString(StringTemplate.of(element.toString()))
                 }
             }
         }

@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "top.song-mojing"
-version = "1.0.0"
+version = "1.0.0-LOCAL.11"
 
 repositories {
     mavenCentral()
@@ -17,12 +17,13 @@ repositories {
 dependencies {
     // 日志
     implementation("org.slf4j:slf4j-nop:2.0.16")
-    // YAML 解析
-    implementation("net.mamoe.yamlkt:yamlkt:0.13.0")
+    // YAML 解析 (SnakeYAML: 纯Java，Android/PC 均稳定)
+    implementation("org.yaml:snakeyaml:2.3")
     // JSON Schema
     implementation("com.networknt:json-schema-validator:1.0.87")
     // Kotlin 序列化
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     // Kotlin 协程核心库
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
     // Ktor HTTP 客户端
@@ -30,11 +31,10 @@ dependencies {
     testImplementation("io.ktor:ktor-client-okhttp:3.0.1")
     testImplementation("io.ktor:ktor-client-content-negotiation:3.0.1")
     testImplementation("io.ktor:ktor-serialization-kotlinx-json:3.0.1")
-    testImplementation("io.ktor:ktor-client-contentnegotiation:3.0.1")
     // JsonPath
     testImplementation("com.jayway.jsonpath:json-path:2.9.0")
     // Json 解析
-    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     testImplementation(kotlin("test"))
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")

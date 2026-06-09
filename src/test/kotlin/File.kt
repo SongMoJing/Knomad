@@ -1,5 +1,5 @@
 import kotlinx.coroutines.runBlocking
-import net.mamoe.yamlkt.Yaml
+import kotlinx.serialization.json.Json
 import top.song_mojing.knomad.model.serialize.KnomadConfigStruct
 import top.song_mojing.knomad.parser.yaml.YamlParser
 import top.song_mojing.knomad.parser.yaml.YamlParserException
@@ -7,10 +7,13 @@ import kotlin.test.Test
 import kotlin.text.Charsets.UTF_8
 
 class FileTest {
+
+    private val json = Json { prettyPrint = true }
+
     @Test
     fun test(): Unit = runBlocking {
         val config = loadConfig("openai-api.yaml")
-        val encode = Yaml.encodeToString(KnomadConfigStruct.serializer(), config)
+        val encode = json.encodeToString(KnomadConfigStruct.serializer(), config)
         println(encode)
     }
 }
