@@ -2,6 +2,7 @@
   <dictionary name="project">
     <words>
       <w>Knomad</w>
+      <w>httpbin</w>
     </words>
   </dictionary>
 </component>

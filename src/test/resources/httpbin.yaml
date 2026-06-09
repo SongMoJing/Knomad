@@ -13,48 +13,43 @@ baseUrl: 'http://127.0.0.1:8080'
 endpoints:
   get:
     path: '/get'
-    GET:
-      request:
-        params:
-          Query1: 'Hello'
-        headers:
-          Authorization: "Bearer ${{variables.Authorization}}"
-          'Content-Type': 'application/json'
-          Accept: 'application/json'
-      response:
-        - httpCode: 'type:success'
-          type: 'appliction/json'
-          values:
-            - name: content
-              type: Dialogue
-              path: '$.choices[0].message.content'
-        - httpCode: 'code:403'
-          type: 'appliction/json'
-          values:
-            - name: errMsg
-              type: String
-              path: '$.error.message'
+    methods:
+      GET:
+        request:
+          query:
+            Query1: 'Hello'
+          headers:
+            Authorization: "Bearer ${{variables.Authorization}}"
+            'Content-Type': 'application/json'
+            Accept: 'application/json'
+        response:
+          - httpCode: 'type:success'
+            type: 'appliction/json'
+            values:
+              - name: Query1
+                type: String
+                path: '$.args.Query1'
+              - name: Authorization
+                type: String
+                path: '$.headers.Authorization'
   post:
     path: '/post'
-    POST:
-      request:
-        params: null
-        headers:
-          Authorization: "Bearer ${{variables.Authorization}}"
-          'Content-Type': 'application/json'
-          Accept: 'text/event-stream'
-        body:
-          data: '${{variables.Content}}'
-      response:
-        - httpCode: 'type:success'
-          type: 'text/event-stream'
-          values:
-            - name: content
-              type: Dialogue
-              path: '$.choices[0].message.content'
-        - httpCode: 'code:403'
-          type: 'appliction/json'
-          values:
-            - name: errMsg
-              type: String
-              path: '$.error.message'
+    methods:
+      POST:
+        request:
+          headers:
+            Authorization: "Bearer ${{variables.Authorization}}"
+            'Content-Type': 'application/json'
+            Accept: 'text/event-stream'
+          body:
+            data: '${{variables.Content}}'
+        response:
+          - httpCode: 'type:success'
+            type: 'text/event-stream'
+            values:
+              - name: Authorization
+                type: String
+                path: '$.headers.Authorization'
+              - name: Data
+                type: String
+                path: '$.json.data[0].data'

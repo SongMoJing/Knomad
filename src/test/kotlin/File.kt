@@ -9,7 +9,7 @@ import kotlin.text.Charsets.UTF_8
 class FileTest {
     @Test
     fun test(): Unit = runBlocking {
-        val config = loadConfig("test.yaml")
+        val config = loadConfig("openai-api.yaml")
         val encode = Yaml.encodeToString(KnomadConfigStruct.serializer(), config)
         println(encode)
     }
